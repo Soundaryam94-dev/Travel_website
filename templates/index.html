@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block content %}
+<header class="hero">
+    <div class="container animate-up">
+        <h1>Explore Beyond Limits</h1>
+        <p>Book your next adventure with our curated selection of premium travel destinations worldwide.</p>
+        <a href="{{ url_for('destinations_list') }}" class="btn btn-primary">Discover Destinations</a>
+    </div>
+</header>
+
+<main class="container">
+    <section style="margin-bottom: 80px;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 40px;">
+            <div>
+                <span style="color: var(--secondary); font-weight: 800; text-transform: uppercase; letter-spacing: 2px;">Featured</span>
+                <h2 style="font-size: 2.5rem; margin-top: 10px;">Our Top Destinations</h2>
+            </div>
+            <a href="{{ url_for('destinations_list') }}" style="color: var(--secondary); font-weight: 600; text-decoration: none;">View All &rarr;</a>
+        </div>
+
+        <div class="grid">
+            {% for dest in destinations %}
+            <div class="card">
+                <img src="{{ dest.image_url }}" alt="{{ dest.title }}">
+                <div class="card-body">
+                    <div class="card-location"><i class="fas fa-location-dot"></i> {{ dest.location }}</div>
+                    <h3 class="card-title">{{ dest.title }}</h3>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
+                        <span class="card-price">${{ dest.price }} <span style="font-size: 0.8rem; color: #64748b; font-weight: 400;">/ person</span></span>
+                        <a href="{{ url_for('destination_detail', id=dest.id) }}" class="btn btn-primary" style="padding: 8px 15px; font-size: 0.9rem;">View Details</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section style="background: white; padding: 80px; border-radius: 50px; text-align: center; border: 1px solid #f1f5f9; box-shadow: var(--card-shadow);">
+        <h2 style="font-size: 2.5rem; margin-bottom: 30px;">Ready for your next trip?</h2>
+        <p style="font-size: 1.1rem; color: #64748b; max-width: 600px; margin: 0 auto 40px;">Join thousands of satisfied travelers who discovered the world with TravelEase. Exclusive deals and seamless booking await.</p>
+        <div style="display: flex; gap: 20px; justify-content: center;">
+            <a href="{{ url_for('register') }}" class="btn btn-primary">Start My Journey</a>
+            <a href="{{ url_for('login') }}" class="btn" style="background: #f1f5f9; color: var(--text);">Login to Account</a>
+        </div>
+    </section>
+</main>
+{% endblock %}

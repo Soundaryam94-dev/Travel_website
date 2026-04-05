@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TravelEase | Your Premium Travel Partner</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <nav>
+        <div class="container nav-content">
+            <a href="{{ url_for('index') }}" class="logo">
+                <i class="fas fa-plane-departure" style="color: var(--secondary);"></i>
+                TravelEase
+            </a>
+            <ul class="nav-links">
+                <li><a href="{{ url_for('index') }}">Home</a></li>
+                <li><a href="{{ url_for('destinations_list') }}">Destinations</a></li>
+                {% if session.get('user') %}
+                    <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+                    <li><a href="{{ url_for('logout') }}">Logout</a></li>
+                {% else %}
+                    <li><a href="{{ url_for('login') }}">Login</a></li>
+                    <li><a href="{{ url_for('register') }}">Register</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container" style="margin-top: 20px;">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash flash-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    {% block content %}{% endblock %}
+
+    <footer style="background: var(--primary); color: white; padding: 60px 0; margin-top: 80px; border-radius: 50px 50px 0 0;">
+        <div class="container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 40px;">
+            <div>
+                <h3>TravelEase</h3>
+                <p style="opacity: 0.7; margin-top: 15px;">Discover the world's most beautiful places with our premium travel packages.</p>
+            </div>
+            <div>
+                <h4>Links</h4>
+                <ul style="list-style: none; margin-top: 15px; display: grid; gap: 10px;">
+                    <li><a href="{{ url_for('index') }}" style="color: white; opacity: 0.7; text-decoration: none;">Home</a></li>
+                    <li><a href="{{ url_for('destinations_list') }}" style="color: white; opacity: 0.7; text-decoration: none;">Destinations</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4>Contact</h4>
+                <p style="opacity: 0.7; margin-top: 15px;">Email: hello@travelease.com</p>
+                <p style="opacity: 0.7;">Phone: +1 234 567 890</p>
+            </div>
+        </div>
+        <div class="container" style="margin-top: 40px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; text-align: center; opacity: 0.5; font-size: 0.9rem;">
+            &copy; 2026 TravelEase. Created for premium explorers.
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block content %}
+<main class="container" style="margin-top: 60px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;">
+        <h1 style="font-size: 2.5rem;">User Dashboard</h1>
+        {% if profile.role == 'admin' %}
+            <a href="{{ url_for('admin') }}" class="btn btn-primary">Admin Control Panel</a>
+        {% endif %}
+    </div>
+
+    <div style="display: grid; grid-template-columns: 300px 1fr; gap: 40px;">
+        <!-- Profile info -->
+        <div style="background: white; padding: 30px; border-radius: 30px; box-shadow: var(--card-shadow); height: fit-content;">
+            <div style="width: 100px; height: 100px; background: var(--secondary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; font-weight: 800; margin: 0 auto 20px;">
+                {{ user.full_name[0] if user.full_name else 'U' }}
+            </div>
+            <h3 style="text-align: center; font-size: 1.25rem;">{{ user.full_name }}</h3>
+            <p style="text-align: center; color: #64748b; margin-bottom: 25px;">{{ user.email }}</p>
+            <div style="border-top: 1px solid #f1f5f9; padding-top: 20px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+                    <span style="font-weight: 600;">Status</span>
+                    <span class="badge badge-confirmed">Active</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span style="font-weight: 600;">Role</span>
+                    <span style="text-transform: capitalize; color: #64748b;">{{ profile.role }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bookings -->
+        <div>
+            <h2 style="font-size: 1.75rem; margin-bottom: 25px;">My Bookings</h2>
+            {% if bookings %}
+                <div style="display: grid; gap: 20px;">
+                    {% for booking in bookings %}
+                    <div style="background: white; padding: 25px; border-radius: 20px; box-shadow: var(--card-shadow); display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <h3 style="font-size: 1.1rem; margin-bottom: 5px;">{{ booking.destinations.title }}</h3>
+                            <div style="color: #64748b; font-size: 0.9rem;">
+                                <i class="far fa-calendar-alt"></i> {{ booking.check_in }} — {{ booking.check_out }}
+                            </div>
+                            <div style="margin-top: 10px; font-weight: 800; color: var(--secondary);">${{ booking.total_price }}</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div class="badge badge-{{ booking.status }}" style="margin-bottom: 10px;">{{ booking.status|capitalize }}</div>
+                            <div style="font-size: 0.8rem; color: #94a3b8;">Ref #{{ booking.id }}</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div style="background: white; padding: 60px; border-radius: 30px; text-align: center; color: #94a3b8;">
+                    <i class="fas fa-folder-open" style="font-size: 3rem; margin-bottom: 15px;"></i>
+                    <p>No bookings found. Time to plan your first trip!</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</main>
+{% endblock %}

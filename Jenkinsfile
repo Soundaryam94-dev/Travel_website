@@ -1,22 +1,21 @@
 pipeline {
     agent any
+
+    environment {
+        VERCEL_TOKEN = credentials('vercel-token')
+    }
+
     stages {
-        stage('Build') {
+        stage('Checkout') {
             steps {
-                echo 'Building the application...'
-                // run build commands here
+                git branch: 'main',
+                    url: 'https://github.com/Soundaryam94-dev/Travel_website.git'
             }
         }
-        stage('Test') {
+
+        stage('Deploy to Vercel') {
             steps {
-                echo 'Testing...'
-                // run test commands like pytest
-            }
-        }
-        stage('Deploy') {
-            steps {
-                echo 'Deploying to server...'
-                // run deployment actions
+                bat 'npx vercel --prod --yes --token=%VERCEL_TOKEN%'
             }
         }
     }

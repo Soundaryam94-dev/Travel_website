@@ -1,3 +1,8 @@
+-- Drop old conflicting tables from previous projects if they exist
+DROP TABLE IF EXISTS public.bookings CASCADE;
+DROP TABLE IF EXISTS public.destinations CASCADE;
+DROP TABLE IF EXISTS public.profiles CASCADE;
+
 -- 1. Profiles table to extend auth.users
 create table profiles (
   id uuid references auth.users on delete cascade primary key,

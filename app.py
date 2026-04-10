@@ -4,7 +4,7 @@ from supabase_client import (
     sign_up, sign_in, sign_out, get_destinations, get_destination_by_id, 
     create_booking, get_user_bookings, get_all_bookings,
     add_destination, update_destination, delete_destination,
-    get_user_profile
+    get_user_profile, get_all_users, update_user_role
 )
 from dotenv import load_dotenv
 
@@ -29,16 +29,28 @@ def is_admin():
     except Exception:
         return False
 
+@app.context_processor
+def inject_admin():
+    return dict(is_admin=is_admin)
+
 # --- Routes ---
 
 @app.route("/")
 def index():
     destinations = get_destinations().data
-    return render_template("index.html", destinations=destinations[:3])
+    if isinstance(destinations, list):
+        dest_list = destinations[:3]
+    else:
+        print("Error from Supabase:", destinations)
+        dest_list = []
+    return render_template("index.html", destinations=dest_list)
 
 @app.route("/destinations")
 def destinations_list():
     destinations = get_destinations().data
+    if not isinstance(destinations, list):
+        print("Error from Supabase:", destinations)
+        destinations = []
     return render_template("destinations.html", destinations=destinations)
 
 @app.route("/destination/<int:id>")
@@ -170,12 +182,28 @@ def admin():
             elif action == "delete":
                 delete_destination(request.form.get("id"))
                 flash("Destination deleted!", "success")
+            elif action == "update_user_role":
+                update_user_role(request.form.get("user_id"), request.form.get("role"))
+                flash("User role updated!", "success")
+            
+            return redirect(url_for("admin"))
         except Exception as e:
             flash(f"Admin Error: {str(e)}", "danger")
+            return redirect(url_for("admin"))
             
     destinations = get_destinations().data
+    if not isinstance(destinations, list):
+        destinations = []
+        
     bookings = get_all_bookings().data
-    return render_template("admin.html", destinations=destinations, bookings=bookings)
+    if not isinstance(bookings, list):
+        bookings = []
+        
+    users = get_all_users().data
+    if not isinstance(users, list):
+        users = []
+        
+    return render_template("admin.html", destinations=destinations, bookings=bookings, users=users)
 
 if __name__ == "__main__":
     app.run(debug=True)

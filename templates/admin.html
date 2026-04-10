@@ -7,12 +7,13 @@
     <div style="display: grid; gap: 40px;">
         <!-- Manage Destinations -->
         <section>
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+            <div class="flex-between" style="margin-bottom: 25px;">
                 <h2 style="font-size: 1.75rem;">Manage Destinations</h2>
                 <button onclick="toggleForm('addForm')" class="btn btn-primary">+ Add New Destination</button>
             </div>
 
-            <div id="addForm" style="display: none; background: white; padding: 30px; border-radius: 20px; box-shadow: var(--card-shadow); margin-bottom: 30px;">
+            <div id="addForm"
+                style="display: none; background: white; padding: 30px; border-radius: 20px; box-shadow: var(--card-shadow); margin-bottom: 30px;">
                 <h3 style="margin-bottom: 20px;">Add New</h3>
                 <form method="POST">
                     <input type="hidden" name="action" value="add">
@@ -39,33 +40,136 @@
                         <textarea name="description" rows="3" required></textarea>
                     </div>
                     <button type="submit" class="btn btn-primary">Create Destination</button>
-                    <button type="button" onclick="toggleForm('addForm')" class="btn" style="background: #f1f5f9; margin-left: 10px;">Cancel</button>
+                    <button type="button" onclick="toggleForm('addForm')" class="btn"
+                        style="background: #f1f5f9; margin-left: 10px;">Cancel</button>
                 </form>
-                <hr style="margin: 30px 0; border: 0.5px solid #f1f5f9;">
-            </div>
+            </div> <!-- Close addForm -->
+
+            <div id="editForm"
+                style="display: none; background: #f8fafc; padding: 30px; border: 1px solid #e2e8f0; border-radius: 20px; box-shadow: var(--card-shadow); margin-bottom: 30px;">
+                <h3 style="margin-bottom: 20px;">Edit Destination</h3>
+                <form method="POST">
+                    <input type="hidden" name="action" value="edit">
+                    <input type="hidden" name="id" id="edit_id">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div class="form-group">
+                            <label>Title</label>
+                            <input type="text" name="title" id="edit_title" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Location</label>
+                            <input type="text" name="location" id="edit_location" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Price</label>
+                            <input type="number" step="0.01" name="price" id="edit_price" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Image URL</label>
+                            <input type="text" name="image_url" id="edit_image_url" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea name="description" id="edit_description" rows="3" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                    <button type="button" onclick="toggleForm('editForm')" class="btn"
+                        style="background: #e2e8f0; margin-left: 10px;">Cancel</button>
+                </form>
+            </div> <!-- Close editForm -->
+            <hr style="margin: 30px 0; border: 0.5px solid #f1f5f9;">
 
             <table>
                 <thead>
                     <tr>
-                        <th>Image</th>
-                        <th>Title</th>
-                        <th>Location</th>
-                        <th>Price</th>
-                        <th>Actions</th>
+                        <th style="width: 10%;">Image</th>
+                        <th style="width: 25%;">Title</th>
+                        <th style="width: 25%;">Location</th>
+                        <th style="width: 15%;">Price</th>
+                        <th style="width: 25%; text-align: left;">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for dest in destinations %}
                     <tr>
-                        <td style="width: 80px;"><img src="{{ dest.image_url }}" style="width: 60px; height: 60px; border-radius: 10px; object-fit: cover;"></td>
+                        <td style="width: 80px;"><img src="{{ dest.image_url }}"
+                                style="width: 60px; height: 60px; border-radius: 10px; object-fit: cover;"></td>
                         <td><strong>{{ dest.title }}</strong></td>
                         <td>{{ dest.location }}</td>
                         <td>${{ dest.price }}</td>
+                        <td class="text-left">
+                            <button class="btn"
+                                style="background: #eef2ff; color: #3730a3; padding: 5px 12px; font-size: 0.8rem; margin-right: 5px;"
+                                data-id="{{ dest.id }}" data-title="{{ dest.title }}"
+                                data-location="{{ dest.location }}" data-price="{{ dest.price }}"
+                                data-image_url="{{ dest.image_url }}" data-description="{{ dest.description }}"
+                                onclick="editDestination(this)">
+                                Edit
+                            </button>
+                            <button class="btn btn-danger" style="padding: 5px 12px; font-size: 0.8rem;"
+                                onclick="confirmDelete('{{ dest.id }}', '{{ dest.title }}')">
+                                Delete
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Custom Delete Modal -->
+        <div id="deleteModal" class="modal-overlay">
+            <div class="modal-content">
+                <div class="modal-icon"><i class="fas fa-trash-can"></i></div>
+                <div class="modal-title">Delete Destination?</div>
+                <div id="modalText" class="modal-text">Are you sure you want to remove this location?</div>
+                <div class="modal-btns">
+                    <form id="deleteForm" method="POST">
+                        <input type="hidden" name="action" value="delete">
+                        <input type="hidden" name="id" id="delete_id">
+                        <button type="submit" class="btn" style="background: #ef4444; color: white;">Yes,
+                            Delete</button>
+                    </form>
+                    <button onclick="closeDeleteModal()" class="btn"
+                        style="background: #f1f5f9; color: var(--text);">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Manage Users -->
+        <section>
+            <h2 style="font-size: 1.75rem; margin-bottom: 25px;">Manage Users</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 30%;">Name</th>
+                        <th style="width: 20%; text-align: center;">Role</th>
+                        <th style="width: 50%; text-align: left;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for u in users %}
+                    <tr>
+                        <td><strong>{{ u.full_name }}</strong></td>
+                        <td class="text-center">
+                            <span class="badge badge-{{ 'success' if u.role == 'admin' else 'info' }}"
+                                style="display: inline-block; min-width: 80px;">
+                                {{ u.role|capitalize }}
+                            </span>
+                        </td>
                         <td>
-                            <form method="POST" style="display: inline;">
-                                <input type="hidden" name="action" value="delete">
-                                <input type="hidden" name="id" value="{{ dest.id }}">
-                                <button type="submit" class="btn btn-danger" style="background: #fee2e2; color: #991b1b; padding: 5px 12px; font-size: 0.8rem;" onclick="return confirm('Delete this destination?')">Delete</button>
+                            <form method="POST"
+                                style="display: flex; justify-content: flex-start; align-items: center; gap: 10px;">
+                                <input type="hidden" name="action" value="update_user_role">
+                                <input type="hidden" name="user_id" value="{{ u.id }}">
+                                <select name="role" class="form-group"
+                                    style="margin-bottom: 0; padding: 5px; height: auto; width: auto; min-width: 100px;">
+                                    <option value="user" {% if u.role=='user' %}selected{% endif %}>User</option>
+                                    <option value="admin" {% if u.role=='admin' %}selected{% endif %}>Admin</option>
+                                </select>
+                                <button type="submit" class="btn btn-primary"
+                                    style="padding: 6px 15px; font-size: 0.8rem;">Update Status</button>
                             </form>
                         </td>
                     </tr>
@@ -80,12 +184,12 @@
             <table>
                 <thead>
                     <tr>
-                        <th>ID</th>
-                        <th>Customer</th>
-                        <th>Destination</th>
-                        <th>Travelers</th>
-                        <th>Total</th>
-                        <th>Status</th>
+                        <th style="width: 10%;">ID</th>
+                        <th style="width: 25%;">Customer</th>
+                        <th style="width: 25%;">Destination</th>
+                        <th style="width: 15%; text-align: center;">Travelers</th>
+                        <th style="width: 15%; text-align: center;">Total</th>
+                        <th style="width: 10%; text-align: center;">Status</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -94,9 +198,10 @@
                         <td>#{{ booking.id }}</td>
                         <td>{{ booking.profiles.full_name }}</td>
                         <td>{{ booking.destinations.title }}</td>
-                        <td>{{ booking.num_travelers }}</td>
-                        <td>${{ booking.total_price }}</td>
-                        <td><span class="badge badge-{{ booking.status }}">{{ booking.status|capitalize }}</span></td>
+                        <td class="text-center">{{ booking.num_travelers }}</td>
+                        <td class="text-center">${{ booking.total_price }}</td>
+                        <td class="text-center"><span class="badge badge-{{ booking.status }}">{{
+                                booking.status|capitalize }}</span></td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -109,6 +214,42 @@
     function toggleForm(id) {
         const form = document.getElementById(id);
         form.style.display = form.style.display === 'none' ? 'block' : 'none';
+        if (id === 'addForm' && form.style.display === 'block') {
+            document.getElementById('editForm').style.display = 'none';
+        }
+    }
+
+    function editDestination(btn) {
+        document.getElementById('editForm').style.display = 'block';
+        document.getElementById('addForm').style.display = 'none';
+
+        const dest = btn.dataset;
+        document.getElementById('edit_id').value = dest.id;
+        document.getElementById('edit_title').value = dest.title;
+        document.getElementById('edit_location').value = dest.location;
+        document.getElementById('edit_price').value = dest.price;
+        document.getElementById('edit_image_url').value = dest.image_url;
+        document.getElementById('edit_description').value = dest.description;
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function confirmDelete(id, title) {
+        document.getElementById('delete_id').value = id;
+        document.getElementById('modalText').innerText = `Are you sure you want to remove "${title}"? This action cannot be undone.`;
+        document.getElementById('deleteModal').classList.add('active');
+    }
+
+    function closeDeleteModal() {
+        document.getElementById('deleteModal').classList.remove('active');
+    }
+
+    // Close modal when clicking outside
+    window.onclick = function (event) {
+        const modal = document.getElementById('deleteModal');
+        if (event.target == modal) {
+            closeDeleteModal();
+        }
     }
 </script>
 {% endblock %}

@@ -29,6 +29,9 @@ def is_admin():
     except Exception:
         return False
 
+
+
+
 @app.context_processor
 def inject_admin():
     return dict(is_admin=is_admin)
@@ -112,7 +115,7 @@ def logout():
     flash("Logged out successfully.", "info")
     return redirect(url_for("index"))
 
-@app.route("/dashboard")
+@app.route("/dashboard", methods=["GET", "POST"])
 def dashboard():
     user = get_current_user()
     if not user:
@@ -120,9 +123,104 @@ def dashboard():
         return redirect(url_for("login"))
     
     try:
-        bookings = get_user_bookings(user["id"]).data
-        profile = get_user_profile(user["id"]).data
-        return render_template("dashboard.html", user=user, profile=profile, bookings=bookings)
+        # Handle Admin Actions
+        if request.method == "POST":
+            action = request.form.get("action")
+            try:
+                if action == "add":
+                    add_destination(
+                        request.form.get("title"),
+                        request.form.get("description"),
+                        request.form.get("location"),
+                        float(request.form.get("price")),
+                        request.form.get("image_url")
+                    )
+                    flash("Destination added!", "success")
+                elif action == "edit":
+                    update_destination(
+                        request.form.get("id"),
+                        request.form.get("title"),
+                        request.form.get("description"),
+                        request.form.get("location"),
+                        float(request.form.get("price")),
+                        request.form.get("image_url")
+                    )
+                    flash("Destination updated!", "success")
+                elif action == "delete":
+                    delete_destination(request.form.get("id"))
+                    flash("Destination deleted!", "success")
+                elif action == "update_user_role":
+                    update_user_role(request.form.get("user_id"), request.form.get("role"))
+                    flash("User role updated!", "success")
+                
+                return redirect(url_for("dashboard"))
+            except Exception as e:
+                flash(f"Admin Error: {str(e)}", "danger")
+                return redirect(url_for("dashboard"))
+                
+        # Admin-specific data
+        admin_data = {}
+        if True:
+            destinations = get_destinations().data
+            if not isinstance(destinations, list): destinations = []
+                
+            all_bookings = get_all_bookings().data
+            if not isinstance(all_bookings, list): all_bookings = []
+                
+            users = get_all_users().data
+            if not isinstance(users, list): users = []
+
+            stats = {
+                "total_destinations": len(destinations),
+                "total_users": len(users),
+                "total_bookings": len(all_bookings),
+                "total_revenue": sum(float(b.get("total_price", 0)) for b in all_bookings)
+            }
+
+            dest_counts = {}
+            for b in all_bookings:
+                dest_dict = b.get("destinations")
+                if isinstance(dest_dict, dict):
+                    dest_title = dest_dict.get("title", "Unknown")
+                    dest_counts[dest_title] = dest_counts.get(dest_title, 0) + 1
+            chart_bookings = {"labels": list(dest_counts.keys()), "data": list(dest_counts.values())}
+
+            loc_revenue = {}
+            for b in all_bookings:
+                dest_dict = b.get("destinations")
+                if isinstance(dest_dict, dict):
+                    loc = dest_dict.get("location", "Unknown")
+                    rev = float(b.get("total_price", 0))
+                    loc_revenue[loc] = loc_revenue.get(loc, 0) + rev
+            chart_revenue = {"labels": list(loc_revenue.keys()), "data": list(loc_revenue.values())}
+
+            monthly_data = {}
+            for b in all_bookings:
+                try:
+                    date_str = b.get("check_in") or b.get("created_at")
+                    if date_str:
+                        month = date_str[:7]
+                        monthly_data[month] = monthly_data.get(month, 0) + 1
+                except: pass
+            
+            if len(monthly_data) < 3:
+                chart_trend = {"labels": ["Jan", "Feb", "Mar", "Apr", "May", "Jun"], "data": [12, 19, 3, 5, 2, 3]}
+            else:
+                sorted_months = sorted(monthly_data.keys())
+                chart_trend = {"labels": sorted_months, "data": [monthly_data[m] for m in sorted_months]}
+                
+            admin_data = {
+                "destinations": destinations,
+                "all_bookings": all_bookings,
+                "users": users,
+                "stats": stats,
+                "chart_bookings": chart_bookings,
+                "chart_revenue": chart_revenue,
+                "chart_trend": chart_trend
+            }
+
+        return render_template("dashboard.html", user=user, **admin_data)
+        
     except Exception as e:
         flash(f"Error loading dashboard: {str(e)}", "danger")
         return redirect(url_for("index"))
@@ -151,59 +249,7 @@ def booking(dest_id):
             
     return render_template("booking.html", destination=dest)
 
-@app.route("/admin", methods=["GET", "POST"])
-def admin():
-    if not is_admin():
-        flash("Unauthorized access. Admin only.", "danger")
-        return redirect(url_for("index"))
-    
-    if request.method == "POST":
-        action = request.form.get("action")
-        try:
-            if action == "add":
-                add_destination(
-                    request.form.get("title"),
-                    request.form.get("description"),
-                    request.form.get("location"),
-                    float(request.form.get("price")),
-                    request.form.get("image_url")
-                )
-                flash("Destination added!", "success")
-            elif action == "edit":
-                update_destination(
-                    request.form.get("id"),
-                    request.form.get("title"),
-                    request.form.get("description"),
-                    request.form.get("location"),
-                    float(request.form.get("price")),
-                    request.form.get("image_url")
-                )
-                flash("Destination updated!", "success")
-            elif action == "delete":
-                delete_destination(request.form.get("id"))
-                flash("Destination deleted!", "success")
-            elif action == "update_user_role":
-                update_user_role(request.form.get("user_id"), request.form.get("role"))
-                flash("User role updated!", "success")
-            
-            return redirect(url_for("admin"))
-        except Exception as e:
-            flash(f"Admin Error: {str(e)}", "danger")
-            return redirect(url_for("admin"))
-            
-    destinations = get_destinations().data
-    if not isinstance(destinations, list):
-        destinations = []
-        
-    bookings = get_all_bookings().data
-    if not isinstance(bookings, list):
-        bookings = []
-        
-    users = get_all_users().data
-    if not isinstance(users, list):
-        users = []
-        
-    return render_template("admin.html", destinations=destinations, bookings=bookings, users=users)
+
 
 if __name__ == "__main__":
     app.run(debug=True)

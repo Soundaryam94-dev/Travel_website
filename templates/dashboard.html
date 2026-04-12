@@ -1,67 +1,533 @@
 {% extends "base.html" %}
 
 {% block content %}
-<main class="container" style="margin-top: 60px;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;">
-        <h1 style="font-size: 2.5rem;">User Dashboard</h1>
-        {% if profile.role == 'admin' %}
-        <a href="{{ url_for('admin') }}" class="btn btn-primary">Admin Control Panel</a>
-        {% endif %}
-    </div>
-
-    <div style="display: grid; grid-template-columns: 300px 1fr; gap: 40px;">
-        <!-- Profile info -->
-        <div
-            style="background: white; padding: 30px; border-radius: 30px; box-shadow: var(--card-shadow); height: fit-content;">
-            <div
-                style="width: 100px; height: 100px; background: var(--secondary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; font-weight: 800; margin: 0 auto 20px;">
-                {{ user.full_name[0] if user.full_name else 'U' }}
-            </div>
-            <h3 style="text-align: center; font-size: 1.25rem;">{{ user.full_name }}</h3>
-            <p style="text-align: center; color: #64748b; margin-bottom: 25px;">{{ user.email }}</p>
-            <div style="border-top: 1px solid #f1f5f9; padding-top: 20px;">
-                <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
-                    <span style="font-weight: 600;">Status</span>
-                    <span class="badge badge-confirmed">Active</span>
-                </div>
-                <div style="display: flex; justify-content: space-between;">
-                    <span style="font-weight: 600;">Role</span>
-                    <span style="text-transform: capitalize; color: #64748b;">{{ profile.role }}</span>
-                </div>
-            </div>
+<div class="admin-layout">
+    <!-- Fixed Sidebar -->
+    <aside class="admin-sidebar">
+        <div class="sidebar-brand" style="transition: transform 0.2s ease; cursor: default;"
+            onmouseover="this.style.transform='translateX(5px)'" onmouseout="this.style.transform='translateX(0)'">
+            <img src="{{ url_for('static', filename='images/soundarya.jpeg') }}" alt="Profile"
+                style="width: 80px; height: 80px; min-width: 40px; min-height: 40px; flex-shrink: 0; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255,255,255,0.15);">
+            <span style="font-size: 1.1rem; font-weight: 600;">Soundarya</span>
         </div>
+        <nav class="sidebar-nav">
+            <a onclick="showSection('dashboard')" class="sidebar-link active" id="link-dashboard">
+                <i class="fas fa-th-large"></i>
+                <span>Dashboard</span>
+            </a>
+            <a onclick="showSection('destinations')" class="sidebar-link" id="link-destinations">
+                <i class="fas fa-map-marked-alt"></i>
+                <span>Destinations</span>
+            </a>
+            <a onclick="showSection('users')" class="sidebar-link" id="link-users">
+                <i class="fas fa-users-cog"></i>
+                <span>Manage Users</span>
+            </a>
+            <a onclick="showSection('bookings')" class="sidebar-link" id="link-bookings">
+                <i class="fas fa-receipt"></i>
+                <span>Customer Bookings</span>
+            </a>
+            <a onclick="showSection('payments')" class="sidebar-link" id="link-payments">
+                <i class="fas fa-credit-card"></i>
+                <span>Payments</span>
+            </a>
+            <a onclick="showSection('reviews')" class="sidebar-link" id="link-reviews">
+                <i class="fas fa-star"></i>
+                <span>Reviews</span>
+            </a>
+        </nav>
+    </aside>
 
-        <!-- Bookings -->
-        <div>
-            <h2 style="font-size: 1.75rem; margin-bottom: 25px;">My Bookings</h2>
-            {% if bookings %}
-            <div style="display: grid; gap: 20px;">
-                {% for booking in bookings %}
-                <div
-                    style="background: white; padding: 25px; border-radius: 20px; box-shadow: var(--card-shadow); display: flex; justify-content: space-between; align-items: center;">
-                    <div>
-                        <h3 style="font-size: 1.1rem; margin-bottom: 5px;">{{ booking.destinations.title }}</h3>
-                        <div style="color: #64748b; font-size: 0.9rem;">
-                            <i class="far fa-calendar-alt"></i> {{ booking.check_in }} — {{ booking.check_out }}
+    <!-- Content Area -->
+    <div class="admin-content">
+        <!-- Sticky Top Bar -->
+        <header class="admin-top-bar">
+            <div class="top-bar-search">
+                <i class="fas fa-search"></i>
+                <input type="text" id="globalSearch" placeholder="Search anything..." onkeyup="filterTable()">
+            </div>
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <span style="font-weight: 600; color: #64748b;">Administrator</span>
+                <a href="{{ url_for('logout') }}" class="btn btn-primary"
+                    style="padding: 8px 20px; font-size: 0.9rem;">Logout</a>
+            </div>
+        </header>
+
+        <!-- Main Workspace -->
+        <main class="admin-main">
+
+            <!-- Dashboard Section -->
+            <div id="section-dashboard" class="admin-section active">
+                <h1 style="margin-bottom: 30px; font-size: 1.75rem;">Dashboard Overview</h1>
+
+                <!-- Stats Grid -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon icon-blue"><i class="fas fa-map"></i></div>
+                        <div>
+                            <div class="stat-label">Total Destinations</div>
+                            <div class="stat-value">{{ stats.total_destinations }}</div>
                         </div>
-                        <div style="margin-top: 10px; font-weight: 800; color: var(--secondary);">${{
-                            booking.total_price }}</div>
                     </div>
-                    <div style="text-align: right;">
-                        <div class="badge badge-{{ booking.status }}" style="margin-bottom: 10px;">{{
-                            booking.status|capitalize }}</div>
-                        <div style="font-size: 0.8rem; color: #94a3b8;">Ref #{{ booking.id }}</div>
+                    <div class="stat-card">
+                        <div class="stat-icon icon-green"><i class="fas fa-users"></i></div>
+                        <div>
+                            <div class="stat-label">Total Users</div>
+                            <div class="stat-value">{{ stats.total_users }}</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon icon-purple"><i class="fas fa-suitcase"></i></div>
+                        <div>
+                            <div class="stat-label">Total Bookings</div>
+                            <div class="stat-value">{{ stats.total_bookings }}</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon icon-orange"><i class="fas fa-dollar-sign"></i></div>
+                        <div>
+                            <div class="stat-label">Total Revenue</div>
+                            <div class="stat-value">${{ "{:,.2f}".format(stats.total_revenue) }}</div>
+                        </div>
                     </div>
                 </div>
-                {% endfor %}
+
+                <!-- Charts Grid -->
+                <div class="charts-grid">
+                    <div class="chart-container">
+                        <h3>Bookings per Destination</h3>
+                        <canvas id="bookingsChart" data-labels="{{ chart_bookings.labels | tojson }}"
+                            data-values="{{ chart_bookings.data | tojson }}"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h3>Revenue by Location</h3>
+                        <canvas id="revenueChart" data-labels="{{ chart_revenue.labels | tojson }}"
+                            data-values="{{ chart_revenue.data | tojson }}"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-container" style="margin-bottom: 40px;">
+                    <h3>Booking Activity (Monthly)</h3>
+                    <canvas id="trendChart" style="max-height: 300px;" data-labels="{{ chart_trend.labels | tojson }}"
+                        data-values="{{ chart_trend.data | tojson }}"></canvas>
+                </div>
             </div>
-            {% else %}
-            <div style="background: white; padding: 60px; border-radius: 30px; text-align: center; color: #94a3b8;">
-                <i class="fas fa-folder-open" style="font-size: 3rem; margin-bottom: 15px;"></i>
-                <p>No bookings found. Time to plan your first trip!</p>
+
+            <!-- Destinations Section -->
+            <div id="section-destinations" class="admin-section">
+                <div class="admin-card">
+                    <div class="admin-card-header">
+                        <h2 style="font-size: 1.25rem;">Manage Destinations</h2>
+                        <button onclick="openModal('addModal')" class="btn btn-primary">+ Add New</button>
+                    </div>
+                    <div style="padding: 0;">
+                        <table id="destinationsTable">
+                            <thead>
+                                <tr>
+                                    <th style="width: 80px;">Image</th>
+                                    <th>Title</th>
+                                    <th>Location</th>
+                                    <th>Price</th>
+                                    <th class="text-left">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for dest in destinations %}
+                                <tr>
+                                    <td><img src="{{ dest.image_url }}"
+                                            style="width: 50px; height: 50px; border-radius: 12px; object-fit: cover;">
+                                    </td>
+                                    <td><strong>{{ dest.title }}</strong></td>
+                                    <td>{{ dest.location }}</td>
+                                    <td style="font-weight: 700; color: var(--secondary);">${{ dest.price }}</td>
+                                    <td class="text-left">
+                                        <button class="btn"
+                                            style="background: #f1f5f9; color: #1e293b; padding: 6px 14px; font-size: 0.8rem;"
+                                            data-id="{{ dest.id }}" data-title="{{ dest.title }}"
+                                            data-location="{{ dest.location }}" data-price="{{ dest.price }}"
+                                            data-image_url="{{ dest.image_url }}"
+                                            data-description="{{ dest.description }}"
+                                            onclick="editDestination(this)">Edit</button>
+                                        <button class="btn btn-danger"
+                                            style="padding: 6px 14px; font-size: 0.8rem; margin-left: 5px;"
+                                            onclick="confirmDelete('{{ dest.id }}', '{{ dest.title }}')">Delete</button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
-            {% endif %}
-        </div>
+
+            <!-- Other sections remain as they were but wrapped in admin-card for visual consistency -->
+            <!-- Users Section -->
+            <div id="section-users" class="admin-section">
+                <div class="admin-card">
+                    <div class="admin-card-header">
+                        <h2 style="font-size: 1.25rem;">User Management</h2>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 40%;">Name</th>
+                                <th style="width: 20%; text-align: center;">Role</th>
+                                <th style="width: 40%; text-align: left;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for u in users %}
+                            <tr>
+                                <td><strong>{{ u.full_name }}</strong><br><span
+                                        style="font-size: 0.8rem; color: #94a3b8;">{{ u.email }}</span></td>
+                                <td class="text-center"><span
+                                        class="badge badge-{{ 'success' if u.role == 'admin' else 'info' }}">{{
+                                        u.role|capitalize }}</span></td>
+                                <td class="text-left">
+                                    <form method="POST" style="display: flex; gap: 10px; align-items: center;">
+                                        <input type="hidden" name="action" value="update_user_role">
+                                        <input type="hidden" name="user_id" value="{{ u.id }}">
+                                        <select name="role" class="form-group"
+                                            style="padding: 5px; margin-bottom: 0; min-width: 100px;">
+                                            <option value="user" {% if u.role=='user' %}selected{% endif %}>User
+                                            </option>
+                                            <option value="admin" {% if u.role=='admin' %}selected{% endif %}>Admin
+                                            </option>
+                                        </select>
+                                        <button type="submit" class="btn btn-primary"
+                                            style="padding: 6px 12px; font-size: 0.8rem;">Update</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Bookings Section -->
+            <div id="section-bookings" class="admin-section">
+                <div class="admin-card">
+                    <div class="admin-card-header">
+                        <h2 style="font-size: 1.25rem;">Booking Overview</h2>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Ref #</th>
+                                <th>Customer</th>
+                                <th>Destination</th>
+                                <th class="text-center">Total</th>
+                                <th class="text-center">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for booking in all_bookings %}
+                            <tr>
+                                <td style="color: #94a3b8;">{{ (booking.id | string)[:8] }}</td>
+                                <td><strong>{{ booking.profiles.full_name }}</strong></td>
+                                <td>{{ booking.destinations.title }}</td>
+                                <td class="text-center" style="font-weight: 700;">${{ booking.total_price }}</td>
+                                <td class="text-center"><span class="badge badge-{{ booking.status }}">{{
+                                        booking.status|capitalize }}</span></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Payments Section (Sample UI for SaaS feel) -->
+            <div id="section-payments" class="admin-section">
+                <div class="admin-card">
+                    <div class="admin-card-header">
+                        <h2 style="font-size: 1.25rem;">Payment Transactions</h2>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Transaction</th>
+                                <th>Amount</th>
+                                <th class="text-center">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="color: #94a3b8;">Apr 10, 2026</td>
+                                <td><strong>TXN-4001</strong><br><span style="font-size: 0.8rem;">Payment for Paris
+                                        Getaway</span></td>
+                                <td style="font-weight: 700;">$1,200.00</td>
+                                <td class="text-center"><span class="badge badge-success">Completed</span></td>
+                            </tr>
+                            <tr>
+                                <td style="color: #94a3b8;">Apr 09, 2026</td>
+                                <td><strong>TXN-4002</strong><br><span style="font-size: 0.8rem;">Payment for Bali
+                                        Paradise</span></td>
+                                <td style="font-weight: 700;">$850.00</td>
+                                <td class="text-center"><span class="badge badge-success">Completed</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Reviews Section -->
+            <div id="section-reviews" class="admin-section">
+                <div class="admin-card">
+                    <div class="admin-card-header">
+                        <h2 style="font-size: 1.25rem;">Recent Reviews</h2>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Rating</th>
+                                <th style="width: 50%;">Comment</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>John Doe</strong></td>
+                                <td style="color: gold;">★★★★★</td>
+                                <td style="font-size: 0.9rem; color: #64748b;">The service was incredible and the
+                                    destination was even better than the photos!</td>
+                                <td class="text-center"><button class="btn"
+                                        style="background: #fee2e2; color: #ef4444; font-size: 0.75rem;">Hide</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </main>
     </div>
-</main>
+</div>
+
+<!-- Modal: Add New Destination -->
+<div id="addModal" class="modal-overlay">
+    <div class="modal-content">
+        <h2 style="margin-bottom: 25px;">Add New Destination</h2>
+        <form method="POST">
+            <input type="hidden" name="action" value="add">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label>Title</label>
+                    <input type="text" name="title" placeholder="e.g. Hawaii Dream" required>
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label>Location</label>
+                    <input type="text" name="location" placeholder="e.g. Hawaii, USA" required>
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label>Price ($)</label>
+                    <input type="number" step="0.01" name="price" placeholder="1200" required>
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label>Image URL</label>
+                    <input type="text" name="image_url" placeholder="https://unsplash..." required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Description</label>
+                <textarea name="description" rows="3" placeholder="Enter a brief description..." required></textarea>
+            </div>
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button type="button" onclick="closeModal('addModal')" class="btn"
+                    style="background: #f1f5f9;">Cancel</button>
+                <button type="submit" class="btn btn-primary">Create Destination</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal: Edit Destination -->
+<div id="editModal" class="modal-overlay">
+    <div class="modal-content">
+        <h2 style="margin-bottom: 25px;">Edit Destination</h2>
+        <form method="POST">
+            <input type="hidden" name="action" value="edit">
+            <input type="hidden" name="id" id="edit_id">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label>Title</label>
+                    <input type="text" name="title" id="edit_title" required>
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label>Location</label>
+                    <input type="text" name="location" id="edit_location" required>
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label>Price ($)</label>
+                    <input type="number" step="0.01" name="price" id="edit_price" required>
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label>Image URL</label>
+                    <input type="text" name="image_url" id="edit_image_url" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Description</label>
+                <textarea name="description" id="edit_description" rows="3" required></textarea>
+            </div>
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button type="button" onclick="closeModal('editModal')" class="btn"
+                    style="background: #f1f5f9;">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal: Delete Confirmation -->
+<div id="deleteModal" class="modal-overlay">
+    <div class="modal-content" style="max-width: 400px; text-align: center;">
+        <div
+            style="width: 70px; height: 70px; background: #fee2e2; color: #ef4444; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; margin: 0 auto 20px;">
+            <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <h2 style="margin-bottom: 10px;">Are you sure?</h2>
+        <p id="deleteText" style="color: #64748b; margin-bottom: 30px;">This action cannot be undone.</p>
+        <form method="POST">
+            <input type="hidden" name="action" value="delete">
+            <input type="hidden" name="id" id="delete_id">
+            <div style="display: flex; gap: 10px; justify-content: center;">
+                <button type="button" onclick="closeModal('deleteModal')" class="btn"
+                    style="background: #f1f5f9;">Cancel</button>
+                <button type="submit" class="btn btn-danger">Yes, Delete</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // --- Charting Logic ---
+    const chartContexts = {
+        bookings: document.getElementById('bookingsChart').getContext('2d'),
+        revenue: document.getElementById('revenueChart').getContext('2d'),
+        trend: document.getElementById('trendChart').getContext('2d')
+    };
+
+    // Bookings Bar Chart
+    const bookingsCanvas = document.getElementById('bookingsChart');
+    new Chart(chartContexts.bookings, {
+        type: 'bar',
+        data: {
+            labels: JSON.parse(bookingsCanvas.dataset.labels),
+            datasets: [{
+                label: 'Bookings',
+                data: JSON.parse(bookingsCanvas.dataset.values),
+                backgroundColor: '#3b82f6',
+                borderRadius: 8
+            }]
+        },
+        options: {
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true, grid: { display: false } } }
+        }
+    });
+
+    // Revenue Pie Chart
+    const revenueCanvas = document.getElementById('revenueChart');
+    new Chart(chartContexts.revenue, {
+        type: 'doughnut',
+        data: {
+            labels: JSON.parse(revenueCanvas.dataset.labels),
+            datasets: [{
+                data: JSON.parse(revenueCanvas.dataset.values),
+                backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            cutout: '70%',
+            plugins: { legend: { position: 'bottom' } }
+        }
+    });
+
+    // Trend Line Chart
+    const trendCanvas = document.getElementById('trendChart');
+    new Chart(chartContexts.trend, {
+        type: 'line',
+        data: {
+            labels: JSON.parse(trendCanvas.dataset.labels),
+            datasets: [{
+                label: 'Monthly Bookings',
+                data: JSON.parse(trendCanvas.dataset.values),
+                borderColor: '#3b82f6',
+                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: {
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, grid: { color: '#f1f5f9' } },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+
+    // --- Navigation Logic ---
+    function showSection(sectionId) {
+        document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+
+        document.getElementById('section-' + sectionId).classList.add('active');
+        document.getElementById('link-' + sectionId).classList.add('active');
+
+        // Reset scroll
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // --- Modal Logic ---
+    function openModal(id) {
+        document.getElementById(id).classList.add('active');
+    }
+
+    function closeModal(id) {
+        document.getElementById(id).classList.remove('active');
+    }
+
+    // --- Destination Features ---
+    function editDestination(btn) {
+        const d = btn.dataset;
+        document.getElementById('edit_id').value = d.id;
+        document.getElementById('edit_title').value = d.title;
+        document.getElementById('edit_location').value = d.location;
+        document.getElementById('edit_price').value = d.price;
+        document.getElementById('edit_image_url').value = d.image_url;
+        document.getElementById('edit_description').value = d.description;
+        openModal('editModal');
+    }
+
+    function confirmDelete(id, title) {
+        document.getElementById('delete_id').value = id;
+        document.getElementById('deleteText').innerText = `Are you sure you want to remove "${title}"? This action cannot be undone.`;
+        openModal('deleteModal');
+    }
+
+    function filterTable() {
+        const input = document.getElementById("globalSearch");
+        const filter = input.value.toLowerCase();
+        const rows = document.querySelectorAll("#destinationsTable tbody tr");
+
+        rows.forEach(row => {
+            const text = row.innerText.toLowerCase();
+            row.style.display = text.includes(filter) ? "" : "none";
+        });
+    }
+
+    // Handle deep-linking
+    window.addEventListener('load', () => {
+        const params = new URLSearchParams(window.location.search);
+        const section = params.get('section');
+        if (section) showSection(section);
+    });
+</script>
+
 {% endblock %}

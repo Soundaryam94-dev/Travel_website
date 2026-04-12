@@ -21,9 +21,6 @@
                 <li><a href="{{ url_for('destinations_list') }}">Destinations</a></li>
                 {% if session.get('user') %}
                 <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
-                {% if is_admin() %}
-                <li><a href="{{ url_for('admin') }}" style="color: var(--secondary);">Admin Panel</a></li>
-                {% endif %}
                 <li><a href="{{ url_for('logout') }}">Logout</a></li>
                 {% else %}
                 <li><a href="{{ url_for('login') }}">Login</a></li>

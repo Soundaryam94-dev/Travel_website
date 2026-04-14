@@ -10,6 +10,7 @@
 </head>
 
 <body>
+    {% block nav %}
     <nav>
         <div class="container nav-content">
             <a href="{{ url_for('index') }}" class="logo">
@@ -29,7 +30,9 @@
             </ul>
         </div>
     </nav>
+    {% endblock %}
 
+    {% block flash_messages %}
     <div class="container" style="margin-top: 20px;">
         {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
@@ -39,9 +42,11 @@
         {% endif %}
         {% endwith %}
     </div>
+    {% endblock %}
 
     {% block content %}{% endblock %}
 
+    {% block footer %}
     <footer
         style="background: var(--primary); color: white; padding: 60px 0; margin-top: 80px; border-radius: 50px 50px 0 0;">
         <div class="container"
@@ -71,6 +76,7 @@
             &copy; 2026 TravelEase. Created for premium explorers.
         </div>
     </footer>
+    {% endblock %}
 </body>
 
 </html>

@@ -62,6 +62,7 @@ nav {
     display: flex;
     gap: 25px;
     list-style: none;
+    margin-left: auto;
 }
 
 .nav-links a {
@@ -138,10 +139,26 @@ nav {
 }
 
 /* Utils */
-.text-center { text-align: center; }
-.text-right { text-align: right; }
-.flex-end { display: flex; justify-content: flex-end; align-items: center; gap: 10px; }
-.flex-between { display: flex; justify-content: space-between; align-items: center; }
+.text-center {
+    text-align: center;
+}
+
+.text-right {
+    text-align: right;
+}
+
+.flex-end {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 10px;
+}
+
+.flex-between {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
 
 /* Cards */
 .grid {
@@ -390,25 +407,34 @@ th {
 }
 
 @keyframes modalSlide {
-    from { transform: scale(0.9); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
+    from {
+        transform: scale(0.9);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
 }
 
 /* --- Admin Panel Redesign (SaaS Dashboard) --- */
 
 .admin-layout {
     display: flex;
-    min-height: 100vh;
+    height: 100vh;
+    overflow: hidden;
     background: #f1f5f9;
 }
 
 .admin-sidebar {
     width: 250px;
     flex: 0 0 250px;
-    background: linear-gradient(180deg, var(--primary) 0%, #1e293b 100%);
+    background: linear-gradient(180deg, var(--primary) 0%, #98b4e1 100%);
     color: white;
-    position: sticky;
+    position: fixed;
     top: 0;
+    left: 0;
     height: 100vh;
     padding: 30px 0;
     z-index: 1000;
@@ -431,7 +457,7 @@ th {
 
 .sidebar-link {
     padding: 15px 30px;
-    color: rgba(255,255,255,0.7);
+    color: rgba(255, 255, 255, 0.7);
     text-decoration: none;
     display: flex;
     align-items: center;
@@ -448,12 +474,12 @@ th {
 }
 
 .sidebar-link:hover {
-    background: rgba(255,255,255,0.05);
+    background: rgba(255, 255, 255, 0.05);
     color: white;
 }
 
 .sidebar-link.active {
-    background: rgba(255,255,255,0.1);
+    background: rgba(255, 255, 255, 0.1);
     color: var(--secondary);
     border-left-color: var(--secondary);
 }
@@ -463,25 +489,36 @@ th {
     display: flex;
     flex-direction: column;
     min-width: 0;
+    margin-left: 250px;
+    margin-top: 80px;
+    overflow-y: auto;
+    height: calc(100vh - 80px);
 }
 
 .admin-top-bar {
     height: 80px;
-    background: rgba(255,255,255,0.8);
+    background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(10px);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 40px;
-    position: sticky;
+    padding: 0 30px;
+    position: fixed;
     top: 0;
+    left: 250px;
+    width: calc(100% - 250px);
     z-index: 900;
-    border-bottom: 1px solid rgba(0,0,0,0.05);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.07);
+    gap: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
 .top-bar-search {
     position: relative;
-    width: 300px;
+    flex: 1;
+    max-width: 400px;
+    display: flex;
+    align-items: center;
 }
 
 .top-bar-search input {
@@ -491,18 +528,50 @@ th {
     border: 1px solid #e2e8f0;
     border-radius: 12px;
     font-size: 0.9rem;
+    font-family: inherit;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.top-bar-search input:focus {
+    outline: none;
+    border-color: var(--secondary);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 .top-bar-search i {
     position: absolute;
-    left: 15px;
+    left: 14px;
     top: 50%;
     transform: translateY(-50%);
     color: #94a3b8;
+    pointer-events: none;
 }
 
 .admin-main {
-    padding: 40px;
+    padding: 30px 40px;
+}
+
+/* Top Bar Right Nav */
+.top-bar-nav {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+.top-bar-nav a {
+    text-decoration: none;
+    color: #475569;
+    font-weight: 600;
+    font-size: 0.9rem;
+    padding: 8px 14px;
+    border-radius: 10px;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.top-bar-nav a:hover {
+    background: #f1f5f9;
+    color: var(--secondary);
 }
 
 /* Stats Cards */
@@ -517,7 +586,7 @@ th {
     background: white;
     padding: 25px;
     border-radius: 24px;
-    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.02);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
     display: flex;
     align-items: center;
     gap: 20px;
@@ -538,10 +607,25 @@ th {
     font-size: 1.5rem;
 }
 
-.icon-blue { background: #eff6ff; color: #3b82f6; }
-.icon-green { background: #f0fdf4; color: #22c55e; }
-.icon-purple { background: #faf5ff; color: #a855f7; }
-.icon-orange { background: #fff7ed; color: #f97316; }
+.icon-blue {
+    background: #eff6ff;
+    color: #3b82f6;
+}
+
+.icon-green {
+    background: #f0fdf4;
+    color: #22c55e;
+}
+
+.icon-purple {
+    background: #faf5ff;
+    color: #a855f7;
+}
+
+.icon-orange {
+    background: #fff7ed;
+    color: #f97316;
+}
 
 .stat-label {
     color: #64748b;
@@ -602,13 +686,49 @@ th {
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
+
 /* Responsive fixes */
 @media (max-width: 1024px) {
-    .admin-sidebar { width: 80px; flex: 0 0 80px; }
-    .sidebar-link span, .sidebar-brand span { display: none; }
-    .sidebar-link { padding: 15px 0; justify-content: center; }
-    .sidebar-brand { justify-content: center; padding: 0 0 40px 0; }
+    .admin-sidebar {
+        width: 80px;
+        flex: 0 0 80px;
+    }
+
+    .admin-top-bar {
+        left: 80px;
+        width: calc(100% - 80px);
+    }
+
+    .admin-content {
+        margin-left: 80px;
+    }
+
+    .sidebar-link span,
+    .sidebar-brand span {
+        display: none;
+    }
+
+    .sidebar-link {
+        padding: 15px 0;
+        justify-content: center;
+    }
+
+    .sidebar-brand {
+        justify-content: center;
+        padding: 0 0 40px 0;
+    }
+
+    .top-bar-nav a span {
+        display: none;
+    }
 }

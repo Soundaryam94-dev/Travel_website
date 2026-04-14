@@ -1,5 +1,9 @@
 {% extends "base.html" %}
 
+{% block nav %}{% endblock %}
+{% block flash_messages %}{% endblock %}
+{% block footer %}{% endblock %}
+
 {% block content %}
 <div class="admin-layout">
     <!-- Fixed Sidebar -->
@@ -46,11 +50,13 @@
                 <i class="fas fa-search"></i>
                 <input type="text" id="globalSearch" placeholder="Search anything..." onkeyup="filterTable()">
             </div>
-            <div style="display: flex; align-items: center; gap: 20px;">
-                <span style="font-weight: 600; color: #64748b;">Administrator</span>
-                <a href="{{ url_for('logout') }}" class="btn btn-primary"
-                    style="padding: 8px 20px; font-size: 0.9rem;">Logout</a>
-            </div>
+            <nav class="top-bar-nav">
+                <a href="{{ url_for('index') }}"><i class="fas fa-home"></i> <span>Home</span></a>
+                <a href="{{ url_for('destinations_list') }}"><i class="fas fa-map-marked-alt"></i> <span>Destinations</span></a>
+                <a href="{{ url_for('logout') }}" class="btn btn-primary" style="padding: 8px 20px; font-size: 0.9rem;">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </nav>
         </header>
 
         <!-- Main Workspace -->
@@ -514,7 +520,7 @@
     function filterTable() {
         const input = document.getElementById("globalSearch");
         const filter = input.value.toLowerCase();
-        const rows = document.querySelectorAll("#destinationsTable tbody tr");
+        const rows = document.querySelectorAll(".admin-content div");
 
         rows.forEach(row => {
             const text = row.innerText.toLowerCase();

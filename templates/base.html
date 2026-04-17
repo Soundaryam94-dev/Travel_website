@@ -18,20 +18,15 @@
                 TravelEase
             </a>
             <ul class="nav-links">
-                <li><a href="{{ url_for('index') }}">Home</a></li>
-                <li><a href="{{ url_for('destinations_list') }}">Destinations</a></li>
+                <li><a href="{{ url_for('index') }}" class="nav-link{% if request.endpoint == 'index' %} active{% endif %}">Home</a></li>
+                <li><a href="{{ url_for('destinations_list') }}" class="nav-link{% if request.endpoint == 'destinations_list' %} active{% endif %}">Destinations</a></li>
                 {% if session.get('user') %}
-                <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
-                <li><a href="{{ url_for('logout') }}" class="nav-auth-btn nav-btn-danger">
-                    <i class="fas fa-sign-out-alt"></i> Logout
-                </a></li>
+                <li><a href="{{ url_for('dashboard') }}" class="nav-link{% if request.endpoint == 'dashboard' %} active{% endif %}">Dashboard</a></li>
+                <li><a href="{{ url_for('logout') }}" class="nav-link">Logout</a></li>
                 {% else %}
-                <li><a href="{{ url_for('login') }}" class="nav-auth-btn nav-btn-outline">
-                    <i class="fas fa-sign-in-alt"></i> Login
-                </a></li>
-                <li><a href="{{ url_for('register') }}" class="nav-auth-btn nav-btn-primary">
-                    <i class="fas fa-user-plus"></i> Register
-                </a></li>
+                <li class="nav-divider" aria-hidden="true"></li>
+                <li><a href="{{ url_for('login') }}" class="nav-link{% if request.endpoint == 'login' %} active{% endif %}">Login</a></li>
+                <li><a href="{{ url_for('register') }}" class="nav-link{% if request.endpoint == 'register' %} active{% endif %}">Register</a></li>
                 {% endif %}
             </ul>
         </div>

@@ -24,7 +24,6 @@
                 <li><a href="{{ url_for('dashboard') }}" class="nav-link{% if request.endpoint == 'dashboard' %} active{% endif %}">Dashboard</a></li>
                 <li><a href="{{ url_for('logout') }}" class="nav-link">Logout</a></li>
                 {% else %}
-                <li class="nav-divider" aria-hidden="true"></li>
                 <li><a href="{{ url_for('login') }}" class="nav-link{% if request.endpoint == 'login' %} active{% endif %}">Login</a></li>
                 <li><a href="{{ url_for('register') }}" class="nav-link{% if request.endpoint == 'register' %} active{% endif %}">Register</a></li>
                 {% endif %}

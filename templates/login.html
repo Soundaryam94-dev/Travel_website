@@ -1,24 +1,134 @@
 {% extends "base.html" %}
 
+{% block nav %}{% endblock %}
+{% block footer %}{% endblock %}
+{% block flash_messages %}{% endblock %}
+
 {% block content %}
-<main class="container" style="margin-top: 100px;">
-    <div class="form-container">
-        <h1 style="text-align: center; margin-bottom: 30px; font-size: 2.5rem;">Welcome Back</h1>
-        <form method="POST">
-            <div class="form-group">
-                <label for="email">Email Address</label>
-                <input type="email" id="email" name="email" required placeholder="name@example.com">
+
+<div class="lp-wrap">
+
+    <!-- LEFT: Hero image panel -->
+    <div class="lp-image">
+        <div class="lp-overlay">
+            <div class="lp-overlay-content">
+                <div class="lp-badge">
+                    <i class="fas fa-globe-americas"></i>
+                    Trusted by 10,000+ travelers
+                </div>
+                <h2>Explore the World<br>Your Way</h2>
+                <p>Discover handpicked destinations, seamless bookings, and unforgettable journeys — all in one place.</p>
+                <div class="lp-stats">
+                    <div class="lp-stat">
+                        <span class="lp-stat-num">500+</span>
+                        <span class="lp-stat-label">Destinations</span>
+                    </div>
+                    <div class="lp-stat-sep"></div>
+                    <div class="lp-stat">
+                        <span class="lp-stat-num">98%</span>
+                        <span class="lp-stat-label">Happy Travelers</span>
+                    </div>
+                    <div class="lp-stat-sep"></div>
+                    <div class="lp-stat">
+                        <span class="lp-stat-num">24/7</span>
+                        <span class="lp-stat-label">Support</span>
+                    </div>
+                </div>
             </div>
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" name="password" required placeholder="••••••••">
+        </div>
+    </div>    <!-- RIGHT: Login form panel -->
+    <div class="lp-panel">
+        <div class="lp-card">
+            
+            <!-- Back to Home Floating (Mobile/Desktop) -->
+            <a href="{{ url_for('index') }}" class="lp-back-link">
+                <i class="fas fa-chevron-left"></i> Home
+            </a>
+
+            <!-- Brand -->
+            <a href="{{ url_for('index') }}" class="lp-brand">
+                <span class="lp-brand-icon"><i class="fas fa-plane-departure"></i></span>
+                <span class="lp-brand-name">TravelEase</span>
+            </a>
+
+            <!-- Heading -->
+            <div class="lp-heading">
+                <h1>Welcome back</h1>
+                <p>Sign in to continue your journey</p>
             </div>
-            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 20px;">Sign In</button>
-        </form>
-        <p style="text-align: center; margin-top: 30px; color: #64748b;">
-            Don't have an account? <a href="{{ url_for('register') }}"
-                style="color: var(--secondary); font-weight: 600; text-decoration: none;">Register here</a>
-        </p>
+
+            <!-- Flash messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                <div class="lp-alert lp-alert-{{ 'error' if category == 'danger' or category == 'error' else category }}">
+                    <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-circle' }}"></i>
+                    {{ message }}
+                </div>
+                {% endfor %}
+            {% endif %}
+            {% endwith %}
+
+            <!-- Form -->
+            <form method="POST" id="loginForm" novalidate>
+
+                <div class="lp-field">
+                    <label for="email">Email Address</label>
+                    <div class="lp-input-wrap">
+                        <i class="fas fa-envelope lp-icon"></i>
+                        <input type="email" id="email" name="email" required placeholder="you@example.com">
+                    </div>
+                </div>
+
+                <div class="lp-field">
+                    <div class="lp-label-row">
+                        <label for="password">Password</label>
+                        <a href="{{ url_for('forgot_password') }}" class="lp-forgot">Forgot password?</a>
+                    </div>
+                    <div class="lp-input-wrap">
+                        <i class="fas fa-lock lp-icon"></i>
+                        <input type="password" id="password" name="password" required placeholder="Enter your password">
+                        <button type="button" class="lp-pw-toggle" onclick="togglePassword()" aria-label="Toggle password">
+                            <i class="fas fa-eye" id="toggleIcon"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <button type="submit" class="lp-btn" id="submitBtn">
+                    <span class="lp-btn-text">Sign In &nbsp;<i class="fas fa-arrow-right"></i></span>
+                    <span class="lp-btn-loader">
+                        <i class="fas fa-circle-notch fa-spin"></i>&nbsp; Signing in…
+                    </span>
+                </button>
+
+            </form>
+
+            <p class="lp-signup-text">
+                Don't have an account?
+                <a href="{{ url_for('register') }}">Create Account</a>
+            </p>
+
+        </div>
     </div>
-</main>
+
+</div>
+
+<script>
+    function togglePassword() {
+        const input = document.getElementById('password');
+        const icon  = document.getElementById('toggleIcon');
+        const hidden = input.type === 'password';
+        input.type = hidden ? 'text' : 'password';
+        icon.classList.toggle('fa-eye',       !hidden);
+        icon.classList.toggle('fa-eye-slash',  hidden);
+    }
+
+    document.getElementById('loginForm').addEventListener('submit', function () {
+        const btn = document.getElementById('submitBtn');
+        btn.querySelector('.lp-btn-text').style.display   = 'none';
+        btn.querySelector('.lp-btn-loader').style.display = 'flex';
+        btn.disabled = true;
+    });
+</script>
+
 {% endblock %}

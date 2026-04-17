@@ -1,54 +1,400 @@
 {% extends "base.html" %}
 
 {% block content %}
-<main class="container" style="margin-top: 60px;">
-    <div
-        style="max-width: 600px; margin: 0 auto; background: white; padding: 40px; border-radius: 40px; box-shadow: var(--card-shadow); border: 1px solid #f1f5f9;">
-        <h1 style="font-size: 2.5rem; margin-bottom: 10px;">Reserve Your Trip</h1>
-        <p style="color: #64748b; margin-bottom: 30px;">Destination: <span
-                style="font-weight: 700; color: var(--text);">{{ destination.title }}</span></p>
+<main class="bk-page">
 
-        <form method="POST" id="bookingForm">
-            <div class="form-group">
-                <label for="check_in">Check-in Date</label>
-                <input type="date" id="check_in" name="check_in" required>
+    <!-- Back link -->
+    <a href="javascript:history.back()" class="bk-back">
+        <i class="fas fa-chevron-left"></i> Back to Destination
+    </a>
+
+    <div class="bk-card">
+
+        <!-- Header -->
+        <div class="bk-header">
+            <div class="bk-header-icon">
+                <i class="fas fa-plane-departure"></i>
             </div>
-
-            <div class="form-group">
-                <label for="check_out">Check-out Date</label>
-                <input type="date" id="check_out" name="check_out" required>
+            <div>
+                <h1 class="bk-title">Reserve Your Trip</h1>
+                <p class="bk-subtitle">
+                    You're booking: <strong>{{ destination.title }}</strong>
+                </p>
             </div>
+        </div>
 
-            <div class="form-group">
-                <label for="travelers">Number of Travelers</label>
-                <input type="number" id="travelers" name="travelers" min="1" value="1" required
-                    onchange="calculateTotal()">
+        <!-- Flash messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+            <div class="bk-alert bk-alert-{{ 'error' if category in ('danger','error') else category }}">
+                <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-circle' }}"></i>
+                {{ message }}
             </div>
+            {% endfor %}
+        {% endif %}
+        {% endwith %}
 
-            <div style="background: #f8fafc; padding: 20px; border-radius: 20px; margin-bottom: 30px;">
-                <div style="display: flex; justify-content: space-between; margin-bottom: 10px; font-weight: 600;">
-                    <span>Price per person</span>
-                    <span>${{ destination.price }}</span>
+        <!-- Form -->
+        <form method="POST" id="bookingForm" novalidate>
+
+            <div class="bk-grid">
+                <!-- Check-in -->
+                <div class="bk-field">
+                    <label for="check_in">
+                        <i class="fas fa-calendar-alt"></i> Check-in Date
+                    </label>
+                    <input type="date" id="check_in" name="check_in" class="bk-input" required>
                 </div>
-                <div
-                    style="display: flex; justify-content: space-between; font-size: 1.5rem; font-weight: 800; color: var(--secondary);">
-                    <span>Total Price</span>
-                    <span id="totalDisplay">${{ destination.price }}</span>
+
+                <!-- Check-out -->
+                <div class="bk-field">
+                    <label for="check_out">
+                        <i class="fas fa-calendar-check"></i> Check-out Date
+                    </label>
+                    <input type="date" id="check_out" name="check_out" class="bk-input" required>
                 </div>
             </div>
 
-            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 15px; font-size: 1.1rem;">Confirm
-                Booking</button>
+            <!-- Travelers -->
+            <div class="bk-field">
+                <label for="travelers">
+                    <i class="fas fa-users"></i> Number of Travelers
+                </label>
+                <div class="bk-stepper-wrap">
+                    <button type="button" class="bk-step-btn" onclick="stepTravelers(-1)" aria-label="Decrease">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                    <input type="number" id="travelers" name="travelers" min="1" max="20" value="1"
+                           class="bk-input bk-stepper" required onchange="calculateTotal()">
+                    <button type="button" class="bk-step-btn" onclick="stepTravelers(1)" aria-label="Increase">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Price summary -->
+            <div class="bk-summary">
+                <div class="bk-summary-row">
+                    <span class="bk-summary-label">
+                        <i class="fas fa-tag"></i> Price per person
+                    </span>
+                    <span class="bk-summary-value">${{ "{:,.0f}".format(destination.price) }}</span>
+                </div>
+                <div class="bk-summary-divider"></div>
+                <div class="bk-summary-row bk-summary-total">
+                    <span>
+                        <i class="fas fa-receipt"></i> Total
+                    </span>
+                    <span id="totalDisplay" class="bk-total-amount">${{ "{:,.0f}".format(destination.price) }}</span>
+                </div>
+            </div>
+
+            <!-- Submit -->
+            <button type="submit" class="bk-btn" id="bookBtn">
+                <span class="bk-btn-text">
+                    <i class="fas fa-lock"></i> Confirm Booking
+                </span>
+                <span class="bk-btn-loader">
+                    <i class="fas fa-circle-notch fa-spin"></i> Processing…
+                </span>
+            </button>
+
         </form>
+
+        <p class="bk-secure-note">
+            <i class="fas fa-shield-alt"></i> Secure booking &mdash; no card required at this step
+        </p>
+
     </div>
 </main>
 
+<style>
+    .bk-page {
+        min-height: calc(100vh - 70px);
+        background: #f1f5f9;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 40px 20px 60px;
+    }
+
+    .bk-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: #64748b;
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-bottom: 24px;
+        padding: 6px 12px 6px 8px;
+        border-radius: 8px;
+        background: white;
+        border: 1px solid #e2e8f0;
+        transition: all 0.2s;
+        align-self: flex-start;
+        max-width: 520px;
+        width: 100%;
+        box-sizing: border-box;
+    }
+    .bk-back:hover { color: #2563eb; background: #eff6ff; border-color: #bfdbfe; transform: translateX(-3px); }
+
+    .bk-card {
+        background: white;
+        border-radius: 20px;
+        padding: 36px 40px 40px;
+        width: 100%;
+        max-width: 520px;
+        box-shadow: 0 1px 3px rgba(15,23,42,0.04),
+                    0 8px 24px rgba(15,23,42,0.07),
+                    0 24px 48px rgba(15,23,42,0.05);
+    }
+
+    /* Header */
+    .bk-header {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 28px;
+        padding-bottom: 24px;
+        border-bottom: 1px solid #f1f5f9;
+    }
+    .bk-header-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 14px;
+        background: #2563eb;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        flex-shrink: 0;
+        box-shadow: 0 6px 16px rgba(37,99,235,0.25);
+    }
+    .bk-title {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: #0f172a;
+        margin: 0 0 4px;
+        letter-spacing: -0.02em;
+    }
+    .bk-subtitle {
+        font-size: 0.88rem;
+        color: #64748b;
+        margin: 0;
+    }
+    .bk-subtitle strong { color: #0f172a; }
+
+    /* Alert */
+    .bk-alert {
+        padding: 12px 16px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        font-size: 0.88rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .bk-alert-error   { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+    .bk-alert-success { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+
+    /* Form fields */
+    .bk-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+    }
+    .bk-field {
+        margin-bottom: 20px;
+    }
+    .bk-field label {
+        display: block;
+        font-size: 0.84rem;
+        font-weight: 600;
+        color: #334155;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 7px;
+    }
+    .bk-field label i { color: #94a3b8; font-size: 0.9rem; }
+    .bk-input {
+        width: 100%;
+        padding: 11px 14px;
+        border-radius: 10px;
+        border: 1.5px solid #e2e8f0;
+        font-family: inherit;
+        font-size: 0.95rem;
+        color: #0f172a;
+        background: #f8fafc;
+        transition: all 0.2s;
+        box-sizing: border-box;
+        outline: none;
+    }
+    .bk-input::placeholder { color: #94a3b8; }
+    .bk-input:focus {
+        border-color: #2563eb;
+        background: white;
+        box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+    }
+
+    /* Stepper */
+    .bk-stepper-wrap {
+        display: flex;
+        align-items: center;
+        gap: 0;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 10px;
+        overflow: hidden;
+        background: #f8fafc;
+        transition: box-shadow 0.2s, border-color 0.2s;
+    }
+    .bk-stepper-wrap:focus-within {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+        background: white;
+    }
+    .bk-step-btn {
+        width: 44px;
+        height: 44px;
+        border: none;
+        background: transparent;
+        color: #64748b;
+        cursor: pointer;
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.15s;
+        flex-shrink: 0;
+    }
+    .bk-step-btn:hover { background: #f1f5f9; color: #2563eb; }
+    .bk-stepper {
+        border: none !important;
+        box-shadow: none !important;
+        background: transparent !important;
+        text-align: center;
+        padding: 11px 8px !important;
+        font-weight: 700;
+        font-size: 1rem;
+        min-width: 60px;
+    }
+    .bk-stepper::-webkit-inner-spin-button,
+    .bk-stepper::-webkit-outer-spin-button { -webkit-appearance: none; }
+
+    /* Price summary */
+    .bk-summary {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 20px;
+        margin-bottom: 24px;
+    }
+    .bk-summary-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.92rem;
+        font-weight: 600;
+        color: #475569;
+    }
+    .bk-summary-label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #64748b;
+    }
+    .bk-summary-label i { color: #94a3b8; }
+    .bk-summary-value { color: #0f172a; }
+    .bk-summary-divider {
+        height: 1px;
+        background: #e2e8f0;
+        margin: 14px 0;
+    }
+    .bk-summary-total {
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: #0f172a;
+    }
+    .bk-total-amount {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: #2563eb;
+        letter-spacing: -0.02em;
+    }
+
+    /* Submit button */
+    .bk-btn {
+        width: 100%;
+        padding: 14px;
+        background: #2563eb;
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-family: inherit;
+        font-size: 1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.22s ease;
+        box-shadow: 0 4px 14px rgba(37,99,235,0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+    .bk-btn:hover:not(:disabled) {
+        background: #1d4ed8;
+        transform: translateY(-2px);
+        box-shadow: 0 10px 24px rgba(37,99,235,0.4);
+    }
+    .bk-btn:disabled { opacity: 0.8; cursor: not-allowed; }
+    .bk-btn-text  { display: flex; align-items: center; gap: 8px; }
+    .bk-btn-loader { display: none; align-items: center; gap: 8px; }
+
+    .bk-secure-note {
+        text-align: center;
+        margin-top: 16px;
+        font-size: 0.8rem;
+        color: #94a3b8;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+    }
+    .bk-secure-note i { color: #22c55e; }
+
+    @media (max-width: 560px) {
+        .bk-card { padding: 24px 20px 28px; border-radius: 16px; }
+        .bk-grid { grid-template-columns: 1fr; }
+        .bk-back { font-size: 0.8rem; }
+    }
+</style>
+
 <script>
     const tourPrice = parseFloat("{{ destination.price or 0 }}");
+
     function calculateTotal() {
-        const travelers = document.getElementById('travelers').value;
-        const total = tourPrice * travelers;
-        document.getElementById('totalDisplay').textContent = '$' + total.toFixed(2);
+        const travelers = Math.max(1, parseInt(document.getElementById('travelers').value) || 1);
+        document.getElementById('travelers').value = travelers;
+        document.getElementById('totalDisplay').textContent =
+            '$' + (tourPrice * travelers).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
     }
+
+    function stepTravelers(delta) {
+        const input = document.getElementById('travelers');
+        const newVal = Math.max(1, Math.min(20, (parseInt(input.value) || 1) + delta));
+        input.value = newVal;
+        calculateTotal();
+    }
+
+    document.getElementById('bookingForm').addEventListener('submit', function () {
+        const btn = document.getElementById('bookBtn');
+        btn.querySelector('.bk-btn-text').style.display = 'none';
+        btn.querySelector('.bk-btn-loader').style.display = 'flex';
+        btn.disabled = true;
+    });
 </script>
 {% endblock %}

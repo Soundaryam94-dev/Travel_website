@@ -162,3 +162,27 @@ def update_user_role(user_id, role):
     if not res.ok:
         error_msg = res.json().get("message", "Failed to update user role")
         raise Exception(f"Supabase Error: {error_msg}")
+
+def update_booking_status(booking_id, new_status):
+    data = {"status": new_status}
+    res = session.patch(f"{url}/rest/v1/bookings?id=eq.{booking_id}", headers=headers, json=data)
+    if not res.ok:
+        error_msg = res.json().get("message", "Failed to update booking status")
+        raise Exception(f"Supabase Error: {error_msg}")
+
+def reset_password_email(email):
+    """Send a password-reset email via Supabase GoTrue /auth/v1/recover."""
+    # Use only the anon/publishable key for auth endpoints
+    anon_key = os.environ.get("SUPABASE_KEY") or key
+    auth_headers = {
+        "apikey": anon_key,
+        "Content-Type": "application/json",
+    }
+    res = session.post(
+        f"{url}/auth/v1/recover",
+        headers=auth_headers,
+        json={"email": email}
+    )
+    if not res.ok:
+        data = res.json()
+        raise Exception(data.get("msg") or data.get("error_description") or "Failed to send reset email")

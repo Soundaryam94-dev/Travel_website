@@ -5,20 +5,23 @@
 {% block footer %}{% endblock %}
 
 {% block content %}
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 <div class="admin-layout">
     <!-- Fixed Sidebar -->
     <aside class="admin-sidebar">
         <div class="sidebar-brand" style="transition: transform 0.2s ease; cursor: default;"
             onmouseover="this.style.transform='translateX(5px)'" onmouseout="this.style.transform='translateX(0)'">
             <img src="{{ url_for('static', filename='images/soundarya.jpeg') }}" alt="Profile"
-                style="width: 80px; height: 80px; min-width: 40px; min-height: 40px; flex-shrink: 0; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255,255,255,0.15);">
+                style="width: 80px; height: 80px; min-width: 40px; min-height: 40px; flex-shrink: 0; border-radius: 50%; object-fit: cover; border: 3px solid rgba(255,255,255,0.4);">
             <span style="font-size: 1.1rem; font-weight: 600;">Soundarya</span>
         </div>
         <nav class="sidebar-nav">
+            <span class="sidebar-section-label">Overview</span>
             <a onclick="showSection('dashboard')" class="sidebar-link active" id="link-dashboard">
                 <i class="fas fa-th-large"></i>
                 <span>Dashboard</span>
             </a>
+            <span class="sidebar-section-label">Manage</span>
             <a onclick="showSection('destinations')" class="sidebar-link" id="link-destinations">
                 <i class="fas fa-map-marked-alt"></i>
                 <span>Destinations</span>
@@ -31,30 +34,46 @@
                 <i class="fas fa-receipt"></i>
                 <span>Customer Bookings</span>
             </a>
+            <span class="sidebar-section-label">Finance</span>
             <a onclick="showSection('payments')" class="sidebar-link" id="link-payments">
                 <i class="fas fa-credit-card"></i>
                 <span>Payments</span>
             </a>
+            <span class="sidebar-section-label">Feedback</span>
             <a onclick="showSection('reviews')" class="sidebar-link" id="link-reviews">
                 <i class="fas fa-star"></i>
                 <span>Reviews</span>
             </a>
         </nav>
+        <div class="sidebar-footer">
+            <a href="{{ url_for('logout') }}" class="sidebar-link" style="color:#f87171;">
+                <i class="fas fa-sign-out-alt" style="color:#f87171;"></i>
+                <span>Logout</span>
+            </a>
+        </div>
     </aside>
 
     <!-- Content Area -->
     <div class="admin-content">
         <!-- Sticky Top Bar -->
         <header class="admin-top-bar">
+            <button class="hamburger-btn" onclick="toggleSidebar()" aria-label="Toggle sidebar">
+                <i class="fas fa-bars"></i>
+            </button>
+            <span class="top-bar-title" id="topBarTitle">
+                <i class="fas fa-th-large" id="topBarIcon" style="color:#3b82f6;"></i>
+                <span id="topBarLabel">Dashboard</span>
+            </span>
             <div class="top-bar-search">
                 <i class="fas fa-search"></i>
                 <input type="text" id="globalSearch" placeholder="Search anything..." onkeyup="filterTable()">
             </div>
             <nav class="top-bar-nav">
                 <a href="{{ url_for('index') }}"><i class="fas fa-home"></i> <span>Home</span></a>
-                <a href="{{ url_for('destinations_list') }}"><i class="fas fa-map-marked-alt"></i> <span>Destinations</span></a>
-                <a href="{{ url_for('logout') }}" class="btn btn-primary" style="padding: 8px 20px; font-size: 0.9rem;">
-                    <i class="fas fa-sign-out-alt"></i> Logout
+                <a href="{{ url_for('destinations_list') }}"><i class="fas fa-map-marked-alt"></i>
+                    <span>Destinations</span></a>
+                <a href="{{ url_for('logout') }}" class="btn btn-primary" style="padding: 7px 18px; font-size: 0.875rem;">
+                    <i class="fas fa-sign-out-alt"></i> <span>Logout</span>
                 </a>
             </nav>
         </header>
@@ -64,32 +83,39 @@
 
             <!-- Dashboard Section -->
             <div id="section-dashboard" class="admin-section active">
-                <h1 style="margin-bottom: 30px; font-size: 1.75rem;">Dashboard Overview</h1>
+                <!-- Personalized Greeting -->
+                <div class="dashboard-greeting">
+                    <h1 class="greeting-text" id="greetingText">Welcome back, Soundarya</h1>
+                    <div class="greeting-meta">
+                        <span class="greeting-date" id="greetingDate"></span>
+                        <span class="greeting-badge"><i class="fas fa-shield-alt"></i> Admin</span>
+                    </div>
+                </div>
 
                 <!-- Stats Grid -->
                 <div class="stats-grid">
-                    <div class="stat-card">
+                    <div class="stat-card card-blue">
                         <div class="stat-icon icon-blue"><i class="fas fa-map"></i></div>
                         <div>
                             <div class="stat-label">Total Destinations</div>
                             <div class="stat-value">{{ stats.total_destinations }}</div>
                         </div>
                     </div>
-                    <div class="stat-card">
+                    <div class="stat-card card-green">
                         <div class="stat-icon icon-green"><i class="fas fa-users"></i></div>
                         <div>
                             <div class="stat-label">Total Users</div>
                             <div class="stat-value">{{ stats.total_users }}</div>
                         </div>
                     </div>
-                    <div class="stat-card">
+                    <div class="stat-card card-purple">
                         <div class="stat-icon icon-purple"><i class="fas fa-suitcase"></i></div>
                         <div>
                             <div class="stat-label">Total Bookings</div>
                             <div class="stat-value">{{ stats.total_bookings }}</div>
                         </div>
                     </div>
-                    <div class="stat-card">
+                    <div class="stat-card card-orange">
                         <div class="stat-icon icon-orange"><i class="fas fa-dollar-sign"></i></div>
                         <div>
                             <div class="stat-label">Total Revenue</div>
@@ -126,45 +152,84 @@
 
             <!-- Destinations Section -->
             <div id="section-destinations" class="admin-section">
-                <div class="admin-card">
-                    <div class="admin-card-header">
-                        <h2 style="font-size: 1.25rem;">Manage Destinations</h2>
-                        <button onclick="openModal('addModal')" class="btn btn-primary">+ Add New</button>
+                <div class="admin-card destinations-card">
+                    <div class="admin-card-header flex-wrap-header">
+                        <div class="header-left">
+                            <h2 style="font-size: 1.25rem; font-weight: 700;">Manage Destinations</h2>
+                        </div>
+                        <div class="header-right">
+                            <div class="table-search">
+                                <i class="fas fa-search search-icon"></i>
+                                <input type="text" id="destSearch" placeholder="Search destinations..." onkeyup="filterDestinations()">
+                            </div>
+                            <button onclick="openModal('addModal')" class="btn btn-primary btn-add-new">
+                                <i class="fas fa-plus"></i> Add New
+                            </button>
+                        </div>
                     </div>
-                    <div style="padding: 0;">
-                        <table id="destinationsTable">
+                    <div class="table-scroll" style="padding: 0;">
+                        <table id="destinationsTable" class="modern-table">
                             <thead>
                                 <tr>
-                                    <th style="width: 80px;">Image</th>
+                                    <th style="width: 70px;">Image</th>
                                     <th>Title</th>
                                     <th>Location</th>
-                                    <th>Price</th>
-                                    <th class="text-left">Actions</th>
+                                    <th class="text-center">Price</th>
+                                    <th class="text-center">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody id="destTableBody">
                                 {% for dest in destinations %}
-                                <tr>
-                                    <td><img src="{{ dest.image_url }}"
-                                            style="width: 50px; height: 50px; border-radius: 12px; object-fit: cover;">
+                                <tr class="table-row-hover">
+                                    <td data-label="Image">
+                                        <div class="img-thumbnail-wrapper">
+                                            <img src="{{ dest.image_url }}" alt="{{ dest.title }}" class="dest-thumbnail">
+                                        </div>
                                     </td>
-                                    <td><strong>{{ dest.title }}</strong></td>
-                                    <td>{{ dest.location }}</td>
-                                    <td style="font-weight: 700; color: var(--secondary);">${{ dest.price }}</td>
-                                    <td class="text-left">
-                                        <button class="btn"
-                                            style="background: #f1f5f9; color: #1e293b; padding: 6px 14px; font-size: 0.8rem;"
-                                            data-id="{{ dest.id }}" data-title="{{ dest.title }}"
-                                            data-location="{{ dest.location }}" data-price="{{ dest.price }}"
-                                            data-image_url="{{ dest.image_url }}"
-                                            data-description="{{ dest.description }}"
-                                            onclick="editDestination(this)">Edit</button>
-                                        <button class="btn btn-danger"
-                                            style="padding: 6px 14px; font-size: 0.8rem; margin-left: 5px;"
-                                            onclick="confirmDelete('{{ dest.id }}', '{{ dest.title }}')">Delete</button>
+                                    <td data-label="Title">
+                                        <div class="dest-title">{{ dest.title }}</div>
+                                    </td>
+                                    <td data-label="Location">
+                                        <div class="dest-location">{{ dest.location }}</div>
+                                    </td>
+                                    <td class="text-center" data-label="Price">
+                                        <div class="dest-price">${{ "{:,.2f}".format(dest.price) }}</div>
+                                    </td>
+                                    <td class="text-center" data-label="Actions">
+                                        <div class="action-buttons">
+                                            <button class="btn-action btn-edit" title="Edit"
+                                                data-id="{{ dest.id }}" data-title="{{ dest.title }}"
+                                                data-location="{{ dest.location }}" data-price="{{ dest.price }}"
+                                                data-image_url="{{ dest.image_url }}"
+                                                data-description="{{ dest.description }}"
+                                                onclick="editDestination(this)">
+                                                <i class="fas fa-pen"></i>
+                                            </button>
+                                            <button class="btn-action btn-delete" title="Delete"
+                                                onclick="confirmDelete('{{ dest.id }}', '{{ dest.title }}')">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="5" class="empty-state">
+                                        <div class="empty-state-content">
+                                            <i class="fas fa-map-marked-alt empty-icon"></i>
+                                            <p>No destinations found.</p>
+                                        </div>
                                     </td>
                                 </tr>
                                 {% endfor %}
+                                <tr id="destEmptyState" style="display: none;">
+                                    <td colspan="5" class="empty-state">
+                                        <div class="empty-state-content">
+                                            <i class="fas fa-search empty-icon"></i>
+                                            <p>No matching destinations found.</p>
+                                        </div>
+                                    </td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -174,142 +239,261 @@
             <!-- Other sections remain as they were but wrapped in admin-card for visual consistency -->
             <!-- Users Section -->
             <div id="section-users" class="admin-section">
-                <div class="admin-card">
-                    <div class="admin-card-header">
-                        <h2 style="font-size: 1.25rem;">User Management</h2>
+                <div class="admin-card destinations-card">
+                    <div class="admin-card-header flex-wrap-header">
+                        <div class="header-left">
+                            <h2 style="font-size: 1.25rem; font-weight: 700;">User Management</h2>
+                        </div>
+                        <div class="header-right">
+                            <div class="table-search">
+                                <i class="fas fa-search search-icon"></i>
+                                <input type="text" id="userSearch" placeholder="Search users..." onkeyup="filterUsers()">
+                            </div>
+                        </div>
                     </div>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th style="width: 40%;">Name</th>
-                                <th style="width: 20%; text-align: center;">Role</th>
-                                <th style="width: 40%; text-align: left;">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for u in users %}
-                            <tr>
-                                <td><strong>{{ u.full_name }}</strong><br><span
-                                        style="font-size: 0.8rem; color: #94a3b8;">{{ u.email }}</span></td>
-                                <td class="text-center"><span
-                                        class="badge badge-{{ 'success' if u.role == 'admin' else 'info' }}">{{
-                                        u.role|capitalize }}</span></td>
-                                <td class="text-left">
-                                    <form method="POST" style="display: flex; gap: 10px; align-items: center;">
-                                        <input type="hidden" name="action" value="update_user_role">
-                                        <input type="hidden" name="user_id" value="{{ u.id }}">
-                                        <select name="role" class="form-group"
-                                            style="padding: 5px; margin-bottom: 0; min-width: 100px;">
-                                            <option value="user" {% if u.role=='user' %}selected{% endif %}>User
-                                            </option>
-                                            <option value="admin" {% if u.role=='admin' %}selected{% endif %}>Admin
-                                            </option>
-                                        </select>
-                                        <button type="submit" class="btn btn-primary"
-                                            style="padding: 6px 12px; font-size: 0.8rem;">Update</button>
-                                    </form>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                    <div class="table-scroll" style="padding: 0;">
+                        <table class="modern-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 45%;">Name</th>
+                                    <th style="width: 25%; text-align: center;">Role</th>
+                                    <th style="width: 30%; text-align: right;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="userTableBody">
+                                {% for u in users %}
+                                <tr class="table-row-hover">
+                                    <td data-label="Name">
+                                        <div style="display: flex; align-items: center; gap: 12px;">
+                                            <div style="width: 40px; height: 40px; border-radius: 50%; background: #eff6ff; display: flex; align-items: center; justify-content: center; color: #3b82f6; font-weight: 700;">
+                                                {{ u.full_name[:1].upper() if u.full_name else '?' }}
+                                            </div>
+                                            <div>
+                                                <div class="dest-title" style="margin-bottom: 2px;">{{ u.full_name }}</div>
+                                                <div class="dest-location" style="font-size: 0.8rem;">{{ u.email }}</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="text-center" data-label="Role">
+                                        {% if u.role == 'admin' %}
+                                            <span class="badge badge-admin" style="background: #faf5ff; color: #7e22ce; border: 1px solid #e9d5ff;"><i class="fas fa-shield-alt" style="margin-right: 4px;"></i> Admin</span>
+                                        {% else %}
+                                            <span class="badge badge-info" style="background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe;"><i class="fas fa-user" style="margin-right: 4px;"></i> User</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-right" data-label="Actions">
+                                        <form method="POST" style="display: flex; gap: 8px; align-items: center; justify-content: flex-end; margin: 0;">
+                                            <input type="hidden" name="action" value="update_user_role">
+                                            <input type="hidden" name="user_id" value="{{ u.id }}">
+                                            <select name="role" style="padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc; font-size: 0.85rem; outline: none; transition: border-color 0.2s; color: #1e293b;">
+                                                <option value="user" {% if u.role=='user' %}selected{% endif %}>User</option>
+                                                <option value="admin" {% if u.role=='admin' %}selected{% endif %}>Admin</option>
+                                            </select>
+                                            <button type="submit" class="btn-action btn-edit" title="Save Role" style="background: #eff6ff; color: #3b82f6; margin-left: 4px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+                                                <i class="fas fa-check"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="3" class="empty-state">
+                                        <div class="empty-state-content">
+                                            <i class="fas fa-users-slash empty-icon"></i>
+                                            <p>No users found in the system.</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                                <tr id="userEmptyState" style="display: none;">
+                                    <td colspan="3" class="empty-state">
+                                        <div class="empty-state-content">
+                                            <i class="fas fa-search empty-icon"></i>
+                                            <p>No matching users found.</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
             <!-- Bookings Section -->
             <div id="section-bookings" class="admin-section">
-                <div class="admin-card">
-                    <div class="admin-card-header">
-                        <h2 style="font-size: 1.25rem;">Booking Overview</h2>
+                <div class="admin-card destinations-card">
+                    <div class="admin-card-header flex-wrap-header">
+                        <div class="header-left">
+                            <h2 style="font-size: 1.25rem; font-weight: 700;"><i class="fas fa-receipt" style="color: #3b82f6; margin-right: 8px;"></i> Booking Overview</h2>
+                        </div>
+                        <div class="header-right">
+                            <div class="table-search">
+                                <i class="fas fa-search search-icon"></i>
+                                <input type="text" id="bookingSearch" placeholder="Search bookings..." onkeyup="filterBookings()">
+                            </div>
+                        </div>
                     </div>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Ref #</th>
-                                <th>Customer</th>
-                                <th>Destination</th>
-                                <th class="text-center">Total</th>
-                                <th class="text-center">Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for booking in all_bookings %}
-                            <tr>
-                                <td style="color: #94a3b8;">{{ (booking.id | string)[:8] }}</td>
-                                <td><strong>{{ booking.profiles.full_name }}</strong></td>
-                                <td>{{ booking.destinations.title }}</td>
-                                <td class="text-center" style="font-weight: 700;">${{ booking.total_price }}</td>
-                                <td class="text-center"><span class="badge badge-{{ booking.status }}">{{
-                                        booking.status|capitalize }}</span></td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                    <div class="table-scroll" style="padding: 0;">
+                        <table class="modern-table">
+                            <thead>
+                                <tr>
+                                    <th>Ref #</th>
+                                    <th>Customer</th>
+                                    <th>Destination</th>
+                                    <th class="text-center">Total</th>
+                                    <th class="text-center">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="bookingTableBody">
+                                {% for booking in all_bookings %}
+                                <tr class="table-row-hover">
+                                    <td data-label="Ref #"><span style="color: #64748b; font-family: monospace; font-size: 0.9rem; background: #f1f5f9; padding: 4px 8px; border-radius: 6px;">#{{ (booking.id | string)[:8] }}</span></td>
+                                    <td data-label="Customer">
+                                        <div style="font-weight: 700; color: #1e293b;">{{ booking.profiles.full_name }}</div>
+                                    </td>
+                                    <td data-label="Destination">
+                                        <div style="color: #475569;">{{ booking.destinations.title }}</div>
+                                    </td>
+                                    <td class="text-center" data-label="Total">
+                                        <div class="dest-price">${{ "{:,.2f}".format(booking.total_price) }}</div>
+                                    </td>
+                                    <td class="text-center" data-label="Status">
+                                        {% if booking.status == 'confirmed' %}
+                                            <button onclick="toggleBookingStatus(this)" style="background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; cursor: pointer; transition: all 0.2s ease;">Confirmed</button>
+                                        {% elif booking.status == 'pending' %}
+                                            <button onclick="toggleBookingStatus(this)" style="background: #fef9c3; color: #854d0e; border: 1px solid #fef08a; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; cursor: pointer; transition: all 0.2s ease;">Pending</button>
+                                        {% else %}
+                                            <button onclick="toggleBookingStatus(this)" style="background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; cursor: pointer; transition: all 0.2s ease;">{{ booking.status|capitalize }}</button>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="5" class="empty-state">
+                                        <div class="empty-state-content">
+                                            <i class="fas fa-ticket-alt empty-icon"></i>
+                                            <p>No customer bookings available.</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                                <tr id="bookingEmptyState" style="display: none;">
+                                    <td colspan="5" class="empty-state">
+                                        <div class="empty-state-content">
+                                            <i class="fas fa-search empty-icon"></i>
+                                            <p>No matching bookings found.</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
             <!-- Payments Section (Sample UI for SaaS feel) -->
             <div id="section-payments" class="admin-section">
-                <div class="admin-card">
-                    <div class="admin-card-header">
-                        <h2 style="font-size: 1.25rem;">Payment Transactions</h2>
+                <div class="admin-card destinations-card">
+                    <div class="admin-card-header flex-wrap-header">
+                        <div class="header-left">
+                            <h2 style="font-size: 1.25rem; font-weight: 700;"><i class="fas fa-credit-card" style="color: #3b82f6; margin-right: 8px;"></i> Payment Transactions</h2>
+                        </div>
+                        <div class="header-right">
+                            <div class="table-search">
+                                <i class="fas fa-search search-icon"></i>
+                                <input type="text" id="paymentSearch" placeholder="Search payments..." onkeyup="filterPayments()">
+                            </div>
+                        </div>
                     </div>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>Transaction</th>
-                                <th>Amount</th>
-                                <th class="text-center">Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td style="color: #94a3b8;">Apr 10, 2026</td>
-                                <td><strong>TXN-4001</strong><br><span style="font-size: 0.8rem;">Payment for Paris
-                                        Getaway</span></td>
-                                <td style="font-weight: 700;">$1,200.00</td>
-                                <td class="text-center"><span class="badge badge-success">Completed</span></td>
-                            </tr>
-                            <tr>
-                                <td style="color: #94a3b8;">Apr 09, 2026</td>
-                                <td><strong>TXN-4002</strong><br><span style="font-size: 0.8rem;">Payment for Bali
-                                        Paradise</span></td>
-                                <td style="font-weight: 700;">$850.00</td>
-                                <td class="text-center"><span class="badge badge-success">Completed</span></td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <div class="table-scroll" style="padding: 0;">
+                        <table class="modern-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th style="width: 40%;">Transaction</th>
+                                    <th class="text-center">Amount</th>
+                                    <th class="text-center">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="paymentTableBody">
+                                <tr class="table-row-hover">
+                                    <td data-label="Date" style="color: #64748b; font-size: 0.9rem;">Apr 10, 2026</td>
+                                    <td data-label="Transaction">
+                                        <div style="font-weight: 700; color: #1e293b; margin-bottom: 2px;">TXN-4001</div>
+                                        <div style="font-size: 0.8rem; color: #475569;">Payment for Paris Getaway</div>
+                                    </td>
+                                    <td class="text-center" data-label="Amount">
+                                        <div class="dest-price" style="background: #eff6ff; color: #0f172a;">$1,200.00</div>
+                                    </td>
+                                    <td class="text-center" data-label="Status">
+                                        <button onclick="togglePaymentStatus(this)" style="background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; cursor: pointer; transition: all 0.2s ease;">Completed</button>
+                                    </td>
+                                </tr>
+                                <tr class="table-row-hover">
+                                    <td data-label="Date" style="color: #64748b; font-size: 0.9rem;">Apr 09, 2026</td>
+                                    <td data-label="Transaction">
+                                        <div style="font-weight: 700; color: #1e293b; margin-bottom: 2px;">TXN-4002</div>
+                                        <div style="font-size: 0.8rem; color: #475569;">Payment for Bali Paradise</div>
+                                    </td>
+                                    <td class="text-center" data-label="Amount">
+                                        <div class="dest-price" style="background: #eff6ff; color: #0f172a;">$850.00</div>
+                                    </td>
+                                    <td class="text-center" data-label="Status">
+                                        <button onclick="togglePaymentStatus(this)" style="background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; cursor: pointer; transition: all 0.2s ease;">Completed</button>
+                                    </td>
+                                </tr>
+                                <tr id="paymentEmptyState" style="display: none;">
+                                    <td colspan="4" class="empty-state">
+                                        <div class="empty-state-content">
+                                            <i class="fas fa-search empty-icon"></i>
+                                            <p>No matching payments found.</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
             <!-- Reviews Section -->
             <div id="section-reviews" class="admin-section">
-                <div class="admin-card">
-                    <div class="admin-card-header">
-                        <h2 style="font-size: 1.25rem;">Recent Reviews</h2>
+                <div class="admin-card destinations-card">
+                    <div class="admin-card-header flex-wrap-header">
+                        <div class="header-left">
+                            <h2 style="font-size: 1.25rem; font-weight: 700;"><i class="fas fa-star" style="color: #f59e0b; margin-right: 8px;"></i> Recent Reviews</h2>
+                        </div>
                     </div>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>User</th>
-                                <th>Rating</th>
-                                <th style="width: 50%;">Comment</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td><strong>John Doe</strong></td>
-                                <td style="color: gold;">★★★★★</td>
-                                <td style="font-size: 0.9rem; color: #64748b;">The service was incredible and the
-                                    destination was even better than the photos!</td>
-                                <td class="text-center"><button class="btn"
-                                        style="background: #fee2e2; color: #ef4444; font-size: 0.75rem;">Hide</button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <div class="table-scroll" style="padding: 0;">
+                        <table class="modern-table">
+                            <thead>
+                                <tr>
+                                    <th>User</th>
+                                    <th>Rating</th>
+                                    <th style="width: 50%;">Comment</th>
+                                    <th class="text-center">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="table-row-hover">
+                                    <td data-label="User">
+                                        <div style="font-weight: 700; color: #1e293b;">John Doe</div>
+                                    </td>
+                                    <td data-label="Rating" style="color: #fbbf24; font-size: 1.1rem; letter-spacing: 2px;">
+                                        ★★★★★
+                                    </td>
+                                    <td data-label="Comment" style="font-size: 0.9rem; color: #475569; line-height: 1.5;">
+                                        The service was incredible and the destination was even better than the photos!
+                                    </td>
+                                    <td class="text-center" data-label="Action">
+                                        <button class="btn-action btn-delete" style="width: auto; padding: 6px 12px; font-size: 0.8rem; border-radius: 20px;" title="Hide Review" onclick="this.closest('tr').style.display='none'">
+                                            <i class="fas fa-eye-slash" style="margin-right: 4px;"></i> Hide
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
@@ -317,99 +501,217 @@
     </div>
 </div>
 
-<!-- Modal: Add New Destination -->
+<!-- ══════════════════════════════════════════════════════
+     Modal: Add New Destination
+     All name="" values and required flags are unchanged.
+══════════════════════════════════════════════════════ -->
 <div id="addModal" class="modal-overlay">
     <div class="modal-content">
-        <h2 style="margin-bottom: 25px;">Add New Destination</h2>
+
+        <!-- Header -->
+        <div class="modal-head">
+            <div>
+                <h2 class="modal-head-title">Add New Destination</h2>
+                <p class="modal-head-sub">Fill in the details to publish a new destination.</p>
+            </div>
+            <button class="modal-close" onclick="closeModal('addModal')" aria-label="Close">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
         <form method="POST">
             <input type="hidden" name="action" value="add">
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
-                <div class="form-group" style="margin-bottom: 0;">
-                    <label>Title</label>
-                    <input type="text" name="title" placeholder="e.g. Hawaii Dream" required>
+
+            <!-- 2-column: Title + Location | Price + Image URL -->
+            <div class="modal-grid">
+                <div class="modal-field">
+                    <label>
+                        <i class="fas fa-tag"></i> Title
+                        <span class="modal-req">*</span>
+                    </label>
+                    <div class="modal-input-wrap">
+                        <i class="fas fa-tag modal-input-icon"></i>
+                        <input type="text" name="title" placeholder="e.g. Hawaii Dream" required>
+                    </div>
                 </div>
-                <div class="form-group" style="margin-bottom: 0;">
-                    <label>Location</label>
-                    <input type="text" name="location" placeholder="e.g. Hawaii, USA" required>
+                <div class="modal-field">
+                    <label>
+                        <i class="fas fa-map-marker-alt"></i> Location
+                        <span class="modal-req">*</span>
+                    </label>
+                    <div class="modal-input-wrap">
+                        <i class="fas fa-map-marker-alt modal-input-icon"></i>
+                        <input type="text" name="location" placeholder="e.g. Hawaii, USA" required>
+                    </div>
                 </div>
-                <div class="form-group" style="margin-bottom: 0;">
-                    <label>Price ($)</label>
-                    <input type="number" step="0.01" name="price" placeholder="1200" required>
+                <div class="modal-field">
+                    <label>
+                        <i class="fas fa-dollar-sign"></i> Price (USD)
+                        <span class="modal-req">*</span>
+                    </label>
+                    <div class="modal-input-wrap">
+                        <i class="fas fa-dollar-sign modal-input-icon"></i>
+                        <input type="number" step="0.01" name="price" placeholder="1200.00" required>
+                    </div>
                 </div>
-                <div class="form-group" style="margin-bottom: 0;">
-                    <label>Image URL</label>
-                    <input type="text" name="image_url" placeholder="https://unsplash..." required>
+                <div class="modal-field">
+                    <label>
+                        <i class="fas fa-link"></i> Image URL
+                        <span class="modal-req">*</span>
+                    </label>
+                    <div class="modal-input-wrap">
+                        <i class="fas fa-link modal-input-icon"></i>
+                        <input type="text" name="image_url" placeholder="https://unsplash.com/..." required>
+                    </div>
                 </div>
             </div>
-            <div class="form-group">
-                <label>Description</label>
-                <textarea name="description" rows="3" placeholder="Enter a brief description..." required></textarea>
+
+            <!-- Full-width: Description -->
+            <div class="modal-field">
+                <label>
+                    <i class="fas fa-align-left"></i> Description
+                    <span class="modal-req">*</span>
+                </label>
+                <textarea name="description" rows="3"
+                    placeholder="A short description of this destination…" required></textarea>
             </div>
-            <div style="display: flex; gap: 10px; justify-content: flex-end;">
-                <button type="button" onclick="closeModal('addModal')" class="btn"
-                    style="background: #f1f5f9;">Cancel</button>
-                <button type="submit" class="btn btn-primary">Create Destination</button>
+
+            <!-- Footer buttons -->
+            <div class="modal-footer">
+                <button type="button" onclick="closeModal('addModal')" class="modal-btn-cancel">
+                    Cancel
+                </button>
+                <button type="submit" class="modal-btn-submit">
+                    <i class="fas fa-plus"></i> Create Destination
+                </button>
             </div>
         </form>
+
     </div>
 </div>
 
-<!-- Modal: Edit Destination -->
+<!-- ══════════════════════════════════════════════════════
+     Modal: Edit Destination
+     All id="" and name="" values are preserved exactly.
+══════════════════════════════════════════════════════ -->
 <div id="editModal" class="modal-overlay">
     <div class="modal-content">
-        <h2 style="margin-bottom: 25px;">Edit Destination</h2>
+
+        <!-- Header -->
+        <div class="modal-head">
+            <div>
+                <h2 class="modal-head-title">Edit Destination</h2>
+                <p class="modal-head-sub">Update the destination details below.</p>
+            </div>
+            <button class="modal-close" onclick="closeModal('editModal')" aria-label="Close">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
         <form method="POST">
             <input type="hidden" name="action" value="edit">
             <input type="hidden" name="id" id="edit_id">
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
-                <div class="form-group" style="margin-bottom: 0;">
-                    <label>Title</label>
-                    <input type="text" name="title" id="edit_title" required>
+
+            <!-- 2-column: Title + Location | Price + Image URL -->
+            <div class="modal-grid">
+                <div class="modal-field">
+                    <label>
+                        <i class="fas fa-tag"></i> Title
+                        <span class="modal-req">*</span>
+                    </label>
+                    <div class="modal-input-wrap">
+                        <i class="fas fa-tag modal-input-icon"></i>
+                        <input type="text" name="title" id="edit_title" required>
+                    </div>
                 </div>
-                <div class="form-group" style="margin-bottom: 0;">
-                    <label>Location</label>
-                    <input type="text" name="location" id="edit_location" required>
+                <div class="modal-field">
+                    <label>
+                        <i class="fas fa-map-marker-alt"></i> Location
+                        <span class="modal-req">*</span>
+                    </label>
+                    <div class="modal-input-wrap">
+                        <i class="fas fa-map-marker-alt modal-input-icon"></i>
+                        <input type="text" name="location" id="edit_location" required>
+                    </div>
                 </div>
-                <div class="form-group" style="margin-bottom: 0;">
-                    <label>Price ($)</label>
-                    <input type="number" step="0.01" name="price" id="edit_price" required>
+                <div class="modal-field">
+                    <label>
+                        <i class="fas fa-dollar-sign"></i> Price (USD)
+                        <span class="modal-req">*</span>
+                    </label>
+                    <div class="modal-input-wrap">
+                        <i class="fas fa-dollar-sign modal-input-icon"></i>
+                        <input type="number" step="0.01" name="price" id="edit_price" required>
+                    </div>
                 </div>
-                <div class="form-group" style="margin-bottom: 0;">
-                    <label>Image URL</label>
-                    <input type="text" name="image_url" id="edit_image_url" required>
+                <div class="modal-field">
+                    <label>
+                        <i class="fas fa-link"></i> Image URL
+                        <span class="modal-req">*</span>
+                    </label>
+                    <div class="modal-input-wrap">
+                        <i class="fas fa-link modal-input-icon"></i>
+                        <input type="text" name="image_url" id="edit_image_url" required>
+                    </div>
                 </div>
             </div>
-            <div class="form-group">
-                <label>Description</label>
+
+            <!-- Full-width: Description -->
+            <div class="modal-field">
+                <label>
+                    <i class="fas fa-align-left"></i> Description
+                    <span class="modal-req">*</span>
+                </label>
                 <textarea name="description" id="edit_description" rows="3" required></textarea>
             </div>
-            <div style="display: flex; gap: 10px; justify-content: flex-end;">
-                <button type="button" onclick="closeModal('editModal')" class="btn"
-                    style="background: #f1f5f9;">Cancel</button>
-                <button type="submit" class="btn btn-primary">Save Changes</button>
+
+            <!-- Footer buttons -->
+            <div class="modal-footer">
+                <button type="button" onclick="closeModal('editModal')" class="modal-btn-cancel">
+                    Cancel
+                </button>
+                <button type="submit" class="modal-btn-submit">
+                    <i class="fas fa-check"></i> Save Changes
+                </button>
             </div>
         </form>
+
     </div>
 </div>
 
-<!-- Modal: Delete Confirmation -->
+<!-- ══════════════════════════════════════════════════════
+     Modal: Delete Confirmation
+     id="delete_id" and id="deleteText" are preserved.
+══════════════════════════════════════════════════════ -->
 <div id="deleteModal" class="modal-overlay">
-    <div class="modal-content" style="max-width: 400px; text-align: center;">
-        <div
-            style="width: 70px; height: 70px; background: #fee2e2; color: #ef4444; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; margin: 0 auto 20px;">
-            <i class="fas fa-exclamation-triangle"></i>
+    <div class="modal-content modal-delete-content">
+        <button class="modal-close" onclick="closeModal('deleteModal')" aria-label="Close" style="top: 16px; right: 16px;">
+            <i class="fas fa-times"></i>
+        </button>
+
+        <div class="modal-delete-icon-wrapper">
+            <i class="fas fa-trash"></i>
         </div>
-        <h2 style="margin-bottom: 10px;">Are you sure?</h2>
-        <p id="deleteText" style="color: #64748b; margin-bottom: 30px;">This action cannot be undone.</p>
+
+        <h2 class="modal-delete-title">Delete Destination?</h2>
+        <p class="modal-delete-text">
+            Are you sure you want to remove <strong id="deleteDestTitle">this destination</strong>?<br>
+            <span style="font-size: 0.85rem; opacity: 0.8;">This action cannot be undone.</span>
+        </p>
+
         <form method="POST">
             <input type="hidden" name="action" value="delete">
             <input type="hidden" name="id" id="delete_id">
-            <div style="display: flex; gap: 10px; justify-content: center;">
-                <button type="button" onclick="closeModal('deleteModal')" class="btn"
-                    style="background: #f1f5f9;">Cancel</button>
-                <button type="submit" class="btn btn-danger">Yes, Delete</button>
+            <div class="modal-footer">
+                <button type="button" onclick="closeModal('deleteModal')" class="modal-btn-cancel">
+                    Cancel
+                </button>
+                <button type="submit" class="modal-btn-submit" style="background: #dc2626; box-shadow: 0 4px 12px rgba(220,38,38,0.25);">
+                    <i class="fas fa-trash-alt"></i> Delete
+                </button>
             </div>
         </form>
+
     </div>
 </div>
 
@@ -417,57 +719,70 @@
 <script>
     document.addEventListener('DOMContentLoaded', function () {
 
-        // ── Shared palette ───────────────────────────────────────────────
-        const COLORS = {
-            blue:   '#3b82f6',
-            green:  '#10b981',
-            purple: '#8b5cf6',
-            amber:  '#f59e0b',
-            rose:   '#ef4444',
-            cyan:   '#06b6d4',
-        };
+        // ── Shared colour palette ────────────────────────────────────────
+        const PALETTE = [
+            '#3b82f6', '#10b981', '#8b5cf6',
+            '#f59e0b', '#06b6d4', '#ef4444',
+            '#f97316', '#84cc16', '#ec4899'
+        ];
 
-        // ── Shared Chart.js defaults ─────────────────────────────────────
+        // ── Chart.js global defaults ─────────────────────────────────────
         Chart.defaults.font.family = "'Outfit', sans-serif";
-        Chart.defaults.font.size   = 13;
-        Chart.defaults.color       = '#64748b';
+        Chart.defaults.font.size = 13;
+        Chart.defaults.color = '#64748b';
 
-        // ── Helper: parse canvas data, fall back to samples ──────────────
-        function parseData(canvasId, sampleLabels, sampleValues) {
-            const el  = document.getElementById(canvasId);
-            if (!el) return { labels: sampleLabels, values: sampleValues };
+        // ── Read real data from canvas data-attributes ───────────────────
+        // Returns { labels, values } or null if backend sent empty arrays.
+        // NO hardcoded fallback — data must come from Supabase.
+        function readData(canvasId) {
+            const el = document.getElementById(canvasId);
+            if (!el) return null;
             let labels = [], values = [];
-            try { labels = JSON.parse(el.dataset.labels || '[]'); } catch(e) {}
-            try { values = JSON.parse(el.dataset.values || '[]'); } catch(e) {}
-            if (!labels.length || !values.length) {
-                return { labels: sampleLabels, values: sampleValues };
-            }
+            try { labels = JSON.parse(el.dataset.labels || '[]'); } catch (e) { }
+            try { values = JSON.parse(el.dataset.values || '[]'); } catch (e) { }
+            if (!labels.length || !values.length) return null;
             return { labels, values };
         }
 
-        // ══════════════════════════════════════════════════════════════════
-        // 1. BOOKINGS PER DESTINATION — Bar Chart
-        // ══════════════════════════════════════════════════════════════════
-        const bCanvas = document.getElementById('bookingsChart');
-        if (bCanvas) {
-            const bCtx = bCanvas.getContext('2d');
-            const { labels: bLabels, values: bValues } = parseData(
-                'bookingsChart',
-                ['Goa', 'Dubai', 'Manali', 'Bali', 'Paris', 'Ooty'],
-                [10,    15,      7,        12,     9,       5     ]
-            );
+        // ── Render an "empty state" message inside a chart container ─────
+        function showEmpty(canvasId, message = 'No data available yet') {
+            const el = document.getElementById(canvasId);
+            if (!el) return;
+            const parent = el.closest('.chart-wrapper') || el.parentElement;
+            el.style.display = 'none';
+            const div = document.createElement('div');
+            div.style.cssText = [
+                'display:flex', 'flex-direction:column', 'align-items:center',
+                'justify-content:center', 'height:200px', 'gap:12px',
+                'color:#94a3b8', 'font-size:0.9rem', 'font-weight:600'
+            ].join(';');
+            div.innerHTML = `<i class="fas fa-chart-bar" style="font-size:2.5rem;opacity:0.3;"></i><span>${message}</span>`;
+            parent.appendChild(div);
+        }
 
-            new Chart(bCtx, {
+        // ── Shared dark tooltip config ───────────────────────────────────
+        const darkTooltip = (labelFn) => ({
+            backgroundColor: '#1e293b',
+            padding: 12,
+            cornerRadius: 10,
+            callbacks: { label: labelFn }
+        });
+
+        // ══════════════════════════════════════════════════════════════════
+        // 1. BOOKINGS PER DESTINATION — Bar Chart (real data only)
+        // ══════════════════════════════════════════════════════════════════
+        const bData = readData('bookingsChart');
+        if (!bData) {
+            showEmpty('bookingsChart', 'No bookings recorded yet');
+        } else {
+            new Chart(document.getElementById('bookingsChart').getContext('2d'), {
                 type: 'bar',
                 data: {
-                    labels: bLabels,
+                    labels: bData.labels,
                     datasets: [{
                         label: 'Bookings',
-                        data: bValues,
-                        backgroundColor: [
-                            COLORS.blue, COLORS.green, COLORS.purple,
-                            COLORS.amber, COLORS.cyan, COLORS.rose
-                        ],
+                        data: bData.values,
+                        backgroundColor: bData.labels.map((_, i) => PALETTE[i % PALETTE.length]),
                         borderRadius: 10,
                         borderSkipped: false,
                         barPercentage: 0.6,
@@ -479,51 +794,30 @@
                     animation: { duration: 900, easing: 'easeOutQuart' },
                     plugins: {
                         legend: { display: false },
-                        tooltip: {
-                            backgroundColor: '#1e293b',
-                            padding: 12,
-                            cornerRadius: 10,
-                            callbacks: {
-                                label: ctx => ` ${ctx.parsed.y} bookings`
-                            }
-                        }
+                        tooltip: darkTooltip(ctx => ` ${ctx.parsed.y} booking${ctx.parsed.y !== 1 ? 's' : ''}`)
                     },
                     scales: {
-                        x: {
-                            grid: { display: false },
-                            ticks: { font: { weight: '600' } }
-                        },
-                        y: {
-                            beginAtZero: true,
-                            grid: { color: '#f1f5f9', drawBorder: false },
-                            ticks: { stepSize: 1 }
-                        }
+                        x: { grid: { display: false }, ticks: { font: { weight: '600' } } },
+                        y: { beginAtZero: true, grid: { color: '#f1f5f9' }, ticks: { stepSize: 1 } }
                     }
                 }
             });
         }
 
         // ══════════════════════════════════════════════════════════════════
-        // 2. REVENUE BY LOCATION — Doughnut Chart
+        // 2. REVENUE BY LOCATION — Doughnut Chart (real data only)
         // ══════════════════════════════════════════════════════════════════
-        const rCanvas = document.getElementById('revenueChart');
-        if (rCanvas) {
-            const { labels: rLabels, values: rValues } = parseData(
-                'revenueChart',
-                ['Goa', 'Dubai', 'Ooty', 'Bali', 'Paris'],
-                [50000, 120000, 30000, 85000, 95000]
-            );
-
-            new Chart(rCanvas.getContext('2d'), {
+        const rData = readData('revenueChart');
+        if (!rData) {
+            showEmpty('revenueChart', 'No revenue data yet');
+        } else {
+            new Chart(document.getElementById('revenueChart').getContext('2d'), {
                 type: 'doughnut',
                 data: {
-                    labels: rLabels,
+                    labels: rData.labels,
                     datasets: [{
-                        data: rValues,
-                        backgroundColor: [
-                            COLORS.blue, COLORS.green, COLORS.purple,
-                            COLORS.amber, COLORS.rose
-                        ],
+                        data: rData.values,
+                        backgroundColor: rData.labels.map((_, i) => PALETTE[i % PALETTE.length]),
                         borderWidth: 3,
                         borderColor: '#ffffff',
                         hoverOffset: 8,
@@ -537,57 +831,37 @@
                     plugins: {
                         legend: {
                             position: 'bottom',
-                            labels: {
-                                padding: 16,
-                                usePointStyle: true,
-                                pointStyleWidth: 10,
-                            }
+                            labels: { padding: 16, usePointStyle: true, pointStyleWidth: 10 }
                         },
-                        tooltip: {
-                            backgroundColor: '#1e293b',
-                            padding: 12,
-                            cornerRadius: 10,
-                            callbacks: {
-                                label: ctx => {
-                                    const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
-                                    const pct   = ((ctx.parsed / total) * 100).toFixed(1);
-                                    return ` $${ctx.parsed.toLocaleString()} (${pct}%)`;
-                                }
-                            }
-                        }
+                        tooltip: darkTooltip(ctx => {
+                            const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                            const pct = ((ctx.parsed / total) * 100).toFixed(1);
+                            return ` $${ctx.parsed.toLocaleString()} (${pct}%)`;
+                        })
                     }
                 }
             });
         }
 
         // ══════════════════════════════════════════════════════════════════
-        // 3. BOOKING ACTIVITY (MONTHLY) — Line Chart
+        // 3. BOOKING ACTIVITY (MONTHLY) — Line Chart (real data only)
         // ══════════════════════════════════════════════════════════════════
-        const tCanvas = document.getElementById('trendChart');
-        if (tCanvas) {
-            const tCtx = tCanvas.getContext('2d');
-            const { labels: tLabels, values: tValues } = parseData(
-                'trendChart',
-                ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-                 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-                [20,    35,    25,    40,    30,    50,
-                 45,    60,    38,    55,    42,    70 ]
-            );
-
-            const lineColor = COLORS.blue;
-
-            new Chart(tCtx, {
+        const tData = readData('trendChart');
+        if (!tData) {
+            showEmpty('trendChart', 'No booking activity yet');
+        } else {
+            new Chart(document.getElementById('trendChart').getContext('2d'), {
                 type: 'line',
                 data: {
-                    labels: tLabels,
+                    labels: tData.labels,
                     datasets: [{
                         label: 'Bookings',
-                        data: tValues,
-                        borderColor: lineColor,
+                        data: tData.values,
+                        borderColor: '#3b82f6',
                         backgroundColor: 'rgba(59, 130, 246, 0.12)',
                         fill: true,
                         tension: 0.45,
-                        pointBackgroundColor: lineColor,
+                        pointBackgroundColor: '#3b82f6',
                         pointBorderColor: '#fff',
                         pointBorderWidth: 2,
                         pointRadius: 5,
@@ -600,31 +874,59 @@
                     animation: { duration: 1000, easing: 'easeInOutCubic' },
                     plugins: {
                         legend: { display: false },
-                        tooltip: {
-                            backgroundColor: '#1e293b',
-                            padding: 12,
-                            cornerRadius: 10,
-                            callbacks: {
-                                label: ctx => ` ${ctx.parsed.y} bookings`
-                            }
-                        }
+                        tooltip: darkTooltip(ctx => ` ${ctx.parsed.y} booking${ctx.parsed.y !== 1 ? 's' : ''}`)
                     },
                     scales: {
-                        x: {
-                            grid: { display: false },
-                            ticks: { font: { weight: '600' } }
-                        },
-                        y: {
-                            beginAtZero: true,
-                            grid: { color: '#f1f5f9', drawBorder: false },
-                            ticks: { stepSize: 5 }
-                        }
+                        x: { grid: { display: false }, ticks: { font: { weight: '600' } } },
+                        y: { beginAtZero: true, grid: { color: '#f1f5f9' }, ticks: { stepSize: 1 } }
                     }
                 }
             });
         }
 
     }); // end DOMContentLoaded
+
+    // --- Greeting + Date ---
+    (function initGreeting() {
+        const hour = new Date().getHours();
+        const greet = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+        const el = document.getElementById('greetingText');
+        if (el) el.textContent = greet + ', Soundarya';
+
+        const dateEl = document.getElementById('greetingDate');
+        if (dateEl) {
+            dateEl.textContent = new Date().toLocaleDateString('en-GB', {
+                weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+            });
+        }
+    })();
+
+    // --- Top bar section map ---
+    const SECTION_META = {
+        dashboard:    { label: 'Dashboard',        icon: 'fa-th-large',      color: '#3b82f6' },
+        destinations: { label: 'Destinations',      icon: 'fa-map-marked-alt', color: '#10b981' },
+        users:        { label: 'Manage Users',      icon: 'fa-users-cog',     color: '#8b5cf6' },
+        bookings:     { label: 'Customer Bookings', icon: 'fa-receipt',       color: '#f59e0b' },
+        payments:     { label: 'Payments',          icon: 'fa-credit-card',   color: '#06b6d4' },
+        reviews:      { label: 'Reviews',           icon: 'fa-star',          color: '#f97316' },
+    };
+
+    // --- Sidebar Toggle (mobile) ---
+    function toggleSidebar() {
+        const sidebar = document.querySelector('.admin-sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        sidebar.classList.toggle('open');
+        overlay.classList.toggle('active');
+    }
+
+    function closeSidebarOnMobile() {
+        if (window.innerWidth <= 768) {
+            const sidebar = document.querySelector('.admin-sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.remove('open');
+            overlay.classList.remove('active');
+        }
+    }
 
     // --- Navigation Logic ---
     function showSection(sectionId) {
@@ -634,8 +936,17 @@
         document.getElementById('section-' + sectionId).classList.add('active');
         document.getElementById('link-' + sectionId).classList.add('active');
 
-        // Reset scroll
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        // Update top bar title + icon
+        const meta = SECTION_META[sectionId];
+        if (meta) {
+            document.getElementById('topBarLabel').textContent = meta.label;
+            const iconEl = document.getElementById('topBarIcon');
+            iconEl.className = 'fas ' + meta.icon;
+            iconEl.style.color = meta.color;
+        }
+
+        closeSidebarOnMobile();
+        document.querySelector('.admin-content').scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     // --- Modal Logic ---
@@ -661,7 +972,7 @@
 
     function confirmDelete(id, title) {
         document.getElementById('delete_id').value = id;
-        document.getElementById('deleteText').innerText = `Are you sure you want to remove "${title}"? This action cannot be undone.`;
+        document.getElementById('deleteDestTitle').innerText = title;
         openModal('deleteModal');
     }
 
@@ -674,6 +985,120 @@
             const text = row.innerText.toLowerCase();
             row.style.display = text.includes(filter) ? "" : "none";
         });
+    }
+
+    function filterDestinations() {
+        let input = document.getElementById('destSearch').value.toLowerCase();
+        let rows = document.querySelectorAll('#destTableBody tr.table-row-hover');
+        let hasVisible = false;
+        
+        rows.forEach(row => {
+            let text = row.innerText.toLowerCase();
+            if (text.includes(input)) {
+                row.style.display = '';
+                hasVisible = true;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+        
+        let emptyState = document.getElementById('destEmptyState');
+        if (emptyState) {
+            emptyState.style.display = hasVisible ? 'none' : '';
+        }
+    }
+
+    function filterUsers() {
+        let input = document.getElementById('userSearch').value.toLowerCase();
+        let rows = document.querySelectorAll('#userTableBody tr.table-row-hover');
+        let hasVisible = false;
+        
+        rows.forEach(row => {
+            let text = row.innerText.toLowerCase();
+            if (text.includes(input)) {
+                row.style.display = '';
+                hasVisible = true;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+        
+        let emptyState = document.getElementById('userEmptyState');
+        if (emptyState) {
+            emptyState.style.display = hasVisible ? 'none' : '';
+        }
+    }
+
+    function filterBookings() {
+        let input = document.getElementById('bookingSearch').value.toLowerCase();
+        let rows = document.querySelectorAll('#bookingTableBody tr.table-row-hover');
+        let hasVisible = false;
+        
+        rows.forEach(row => {
+            let text = row.innerText.toLowerCase();
+            if (text.includes(input)) {
+                row.style.display = '';
+                hasVisible = true;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+        
+        let emptyState = document.getElementById('bookingEmptyState');
+        if (emptyState) {
+            emptyState.style.display = hasVisible ? 'none' : '';
+        }
+    }
+
+    function filterPayments() {
+        let input = document.getElementById('paymentSearch').value.toLowerCase();
+        let rows = document.querySelectorAll('#paymentTableBody tr.table-row-hover');
+        let hasVisible = false;
+        
+        rows.forEach(row => {
+            let text = row.innerText.toLowerCase();
+            if (text.includes(input)) {
+                row.style.display = '';
+                hasVisible = true;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+        
+        let emptyState = document.getElementById('paymentEmptyState');
+        if (emptyState) {
+            emptyState.style.display = hasVisible ? 'none' : '';
+        }
+    }
+
+    function togglePaymentStatus(btn) {
+        const current = btn.innerText.trim().toLowerCase();
+        if (current === "completed") {
+            btn.textContent = "Pending";
+            btn.style.background = "#fef9c3";
+            btn.style.color = "#854d0e";
+            btn.style.borderColor = "#fef08a";
+        } else {
+            btn.textContent = "Completed";
+            btn.style.background = "#dcfce7";
+            btn.style.color = "#166534";
+            btn.style.borderColor = "#bbf7d0";
+        }
+    }
+
+    function toggleBookingStatus(btn) {
+        const current = btn.innerText.trim().toLowerCase();
+        if (current === "confirmed") {
+            btn.textContent = "Pending";
+            btn.style.background = "#fef9c3";
+            btn.style.color = "#854d0e";
+            btn.style.borderColor = "#fef08a";
+        } else {
+            btn.textContent = "Confirmed";
+            btn.style.background = "#dcfce7";
+            btn.style.color = "#166534";
+            btn.style.borderColor = "#bbf7d0";
+        }
     }
 
     // Handle deep-linking

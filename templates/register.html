@@ -1,28 +1,137 @@
 {% extends "base.html" %}
 
+{# Focused Auth UX #}
+{% block nav %}{% endblock %}
+{% block footer %}{% endblock %}
+{% block flash_messages %}{% endblock %}
+
 {% block content %}
-<main class="container" style="margin-top: 100px;">
-    <div class="form-container">
-        <h1 style="text-align: center; margin-bottom: 30px; font-size: 2.5rem;">Create Account</h1>
-        <form method="POST">
-            <div class="form-group">
-                <label for="full_name">Full Name</label>
-                <input type="text" id="full_name" name="full_name" required placeholder="John Doe">
+
+<div class="lp-wrap">
+
+    <!-- LEFT: Registration Content -->
+    <div class="lp-image" style="background-image: url('https://www.thepinnaclelist.com/wp-content/uploads/2021/07/Bora-Bora-French-Polynesia-Top-10-Luxury-Travel-Destinations-Around-the-World.jpg');">
+        <div class="lp-overlay">
+            <div class="lp-overlay-content">
+                <div class="lp-badge">
+                    <i class="fas fa-globe-americas"></i>
+                    Join 10,000+ travelers
+                </div>
+                <h2>Start Your<br>Adventure Today</h2>
+                <p>Create a free account and unlock exclusive deals and 24/7 priority support.</p>
+
+                <ul class="lp-features">
+                    <li>
+                        <span class="lp-feature-icon"><i class="fas fa-check"></i></span>
+                        Free cancellation on most bookings
+                    </li>
+                    <li>
+                        <span class="lp-feature-icon"><i class="fas fa-check"></i></span>
+                        Exclusive member-only deals
+                    </li>
+                    <li>
+                        <span class="lp-feature-icon"><i class="fas fa-check"></i></span>
+                        24/7 dedicated travel support
+                    </li>
+                </ul>
             </div>
-            <div class="form-group">
-                <label for="email">Email Address</label>
-                <input type="email" id="email" name="email" required placeholder="name@example.com">
-            </div>
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" name="password" required placeholder="Min 8 characters">
-            </div>
-            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 20px;">Sign Up</button>
-        </form>
-        <p style="text-align: center; margin-top: 30px; color: #64748b;">
-            Already have an account? <a href="{{ url_for('login') }}"
-                style="color: var(--secondary); font-weight: 600; text-decoration: none;">Log In</a>
-        </p>
+        </div>
     </div>
-</main>
+
+    <!-- RIGHT: Form Panel -->
+    <div class="lp-panel">
+        <div class="lp-card">
+            
+            <a href="{{ url_for('index') }}" class="lp-back-link">
+                <i class="fas fa-chevron-left"></i> Home
+            </a>
+
+            <a href="{{ url_for('index') }}" class="lp-brand">
+                <span class="lp-brand-icon"><i class="fas fa-plane-departure"></i></span>
+                <span class="lp-brand-name">TravelEase</span>
+            </a>
+
+            <div class="lp-heading">
+                <h1>Create Account</h1>
+                <p>Join us today — it's free forever</p>
+            </div>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                <div class="lp-alert lp-alert-{{ 'error' if category == 'danger' or category == 'error' else category }}">
+                    <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-circle' }}"></i>
+                    {{ message }}
+                </div>
+                {% endfor %}
+            {% endif %}
+            {% endwith %}
+
+            <form method="POST" id="registerForm" novalidate>
+
+                <div class="lp-field">
+                    <label for="full_name">Full Name</label>
+                    <div class="lp-input-wrap">
+                        <i class="fas fa-user lp-icon"></i>
+                        <input type="text" id="full_name" name="full_name" required placeholder="John Doe">
+                    </div>
+                </div>
+
+                <div class="lp-field">
+                    <label for="email">Email Address</label>
+                    <div class="lp-input-wrap">
+                        <i class="fas fa-envelope lp-icon"></i>
+                        <input type="email" id="email" name="email" required placeholder="you@example.com">
+                    </div>
+                </div>
+
+                <div class="lp-field">
+                    <label for="password">Password</label>
+                    <div class="lp-input-wrap">
+                        <i class="fas fa-lock lp-icon"></i>
+                        <input type="password" id="password" name="password" required placeholder="Min. 8 characters">
+                        <button type="button" class="lp-pw-toggle" onclick="togglePassword()" aria-label="Toggle password">
+                            <i class="fas fa-eye" id="toggleIcon"></i>
+                        </button>
+                    </div>
+                    <p class="lp-hint">Use 8+ characters with a mix of letters and numbers.</p>
+                </div>
+
+                <button type="submit" class="lp-btn" id="submitBtn">
+                    <span class="lp-btn-text">Create Account &nbsp;<i class="fas fa-arrow-right"></i></span>
+                    <span class="lp-btn-loader">
+                        <i class="fas fa-circle-notch fa-spin"></i>&nbsp; Creating account…
+                    </span>
+                </button>
+
+            </form>
+
+            <p class="lp-signup-text">
+                Already have an account?
+                <a href="{{ url_for('login') }}">Sign In</a>
+            </p>
+
+        </div>
+    </div>
+
+</div>
+
+<script>
+    function togglePassword() {
+        const input = document.getElementById('password');
+        const icon  = document.getElementById('toggleIcon');
+        const hidden = input.type === 'password';
+        input.type = hidden ? 'text' : 'password';
+        icon.classList.toggle('fa-eye',       !hidden);
+        icon.classList.toggle('fa-eye-slash',  hidden);
+    }
+
+    document.getElementById('registerForm').addEventListener('submit', function () {
+        const btn = document.getElementById('submitBtn');
+        btn.querySelector('.lp-btn-text').style.display   = 'none';
+        btn.querySelector('.lp-btn-loader').style.display = 'flex';
+        btn.disabled = true;
+    });
+</script>
+
 {% endblock %}

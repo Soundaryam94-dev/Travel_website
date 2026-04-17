@@ -1,45 +1,75 @@
 {% extends "base.html" %}
 
 {% block content %}
-<main class="container" style="margin-top: 60px;">
-    <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 40px; align-items: start;">
-        <div>
-            <img src="{{ destination.image_url }}" alt="{{ destination.title }}"
-                style="width: 100%; border-radius: 40px; box-shadow: var(--card-shadow); height: 500px; object-fit: cover; margin-bottom: 30px;">
-            <h1 style="font-size: 3rem;">{{ destination.title }}</h1>
-            <div class="card-location"><i class="fas fa-location-dot"></i> {{ destination.location }}</div>
-            <p style="font-size: 1.2rem; color: #475569; margin: 20px 0; line-height: 1.8;">{{ destination.description
-                }}</p>
-        </div>
-
-        <div
-            style="background: white; padding: 40px; border-radius: 40px; box-shadow: var(--card-shadow); position: sticky; top: 100px;">
-            <h3 style="font-size: 1.5rem; margin-bottom: 20px;">Experience the best of {{ destination.location }}</h3>
-            <div
-                style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 30px; border-bottom: 1px solid #f1f5f9; padding-bottom: 20px;">
-                <span style="font-size: 2.5rem; font-weight: 800; color: var(--secondary);">${{ destination.price
-                    }}</span>
-                <span style="color: #64748b; font-weight: 600;">/ person</span>
+<main class="container">
+    <div class="detail-grid">
+        <!-- Main Content Area -->
+        <article class="detail-main">
+            <img src="{{ destination.image_url }}" alt="{{ destination.title }}" class="detail-main-image">
+            
+            <h1 class="detail-title">{{ destination.title }}</h1>
+            
+            <div class="detail-location">
+                <i class="fas fa-map-marker-alt"></i>
+                {{ destination.location }}
+            </div>
+            
+            <div class="detail-desc">
+                {{ destination.description }}
             </div>
 
-            <p style="color: #64748b; margin-bottom: 30px;">Book now to secure your spot. This premium package includes
-                all accommodation, guided tours, and transportation.</p>
-
-            <a href="{{ url_for('booking', dest_id=destination.id) }}" class="btn btn-primary"
-                style="width: 100%; text-align: center; font-size: 1.2rem; padding: 15px;">Book This Trip &rarr;</a>
-
-            <div style="margin-top: 30px; display: grid; gap: 15px;">
-                <div style="display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 0.9rem;">
-                    <i class="fas fa-check-circle" style="color: #10b981;"></i> Free Cancellation
+            <!-- Additional Luxury Context -->
+            <div class="luxury-features" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 30px; margin-top: 50px; padding-top: 40px; border-top: 1px solid #e2e8f0;">
+                <div class="luxury-feature-item">
+                    <i class="fas fa-gem" style="color: var(--secondary); font-size: 1.5rem; margin-bottom: 15px; display: block;"></i>
+                    <h4 style="font-weight: 800; margin-bottom: 8px;">Exclusive Access</h4>
+                    <p style="font-size: 0.9rem; color: var(--text-muted);">Private tours and member-only experiences.</p>
                 </div>
-                <div style="display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 0.9rem;">
-                    <i class="fas fa-check-circle" style="color: #10b981;"></i> Best Price Guaranteed
-                </div>
-                <div style="display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 0.9rem;">
-                    <i class="fas fa-check-circle" style="color: #10b981;"></i> 24/7 Support
+                <div class="luxury-feature-item">
+                    <i class="fas fa-concierge-bell" style="color: var(--secondary); font-size: 1.5rem; margin-bottom: 15px; display: block;"></i>
+                    <h4 style="font-weight: 800; margin-bottom: 8px;">24/7 Concierge</h4>
+                    <p style="font-size: 0.9rem; color: var(--text-muted);">Personal assistance throughout your stay.</p>
                 </div>
             </div>
-        </div>
+        </article>
+
+        <!-- Premium Booking Sidebar -->
+        <aside class="booking-card-premium">
+            <h3 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 20px; color: var(--primary);">
+                Reserve Your Experience
+            </h3>
+            
+            <div class="booking-price-row">
+                <div class="booking-price-wrap">
+                    <span class="booking-price-val">${{ "{:,.0f}".format(destination.price) }}</span>
+                    <span class="booking-price-label">/ person</span>
+                </div>
+            </div>
+
+            <p style="color: var(--text-muted); line-height: 1.6; margin-bottom: 32px; font-size: 1.05rem;">
+                Unlock the ultimate journey to {{ destination.location }}. This premium package includes elite accommodation, curated guided tours, and private transportation.
+            </p>
+
+            <a href="{{ url_for('booking', dest_id=destination.id) }}" class="btn btn-primary" style="width: 100%; justify-content: center; font-size: 1.1rem; padding: 18px;">
+                Book Now <i class="fas fa-arrow-right"></i>
+            </a>
+
+            <!-- Premium Reassurance Checklist -->
+            <div class="booking-checklist">
+                <div class="checklist-item">
+                    <i class="fas fa-shield-check"></i>
+                    <span>Secure Payment & Instant Confirmation</span>
+                </div>
+                <div class="checklist-item">
+                    <i class="fas fa-calendar-check"></i>
+                    <span>Flexible Cancellation Policy</span>
+                </div>
+                <div class="checklist-item">
+                    <i class="fas fa-stars"></i>
+                    <span>Best Price Matching for Members</span>
+                </div>
+            </div>
+        </aside>
     </div>
 </main>
 {% endblock %}

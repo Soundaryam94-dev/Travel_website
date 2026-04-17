@@ -1,10 +1,10 @@
 import os
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 from supabase_client import (
-    sign_up, sign_in, sign_out, get_destinations, get_destination_by_id, 
+    sign_up, sign_in, sign_out, get_destinations, get_destination_by_id,
     create_booking, get_user_bookings, get_all_bookings,
     add_destination, update_destination, delete_destination,
-    get_user_profile, get_all_users, update_user_role
+    get_user_profile, get_all_users, update_user_role, reset_password_email
 )
 from dotenv import load_dotenv
 
@@ -177,37 +177,55 @@ def dashboard():
                 "total_revenue": sum(float(b.get("total_price", 0)) for b in all_bookings)
             }
 
-            dest_counts = {}
+            # ── Chart 1: Bookings per Destination ──────────────────────────
+            # Seed all destinations with 0 bookings, then add real counts
+            dest_counts = {d["title"]: 0 for d in destinations}
             for b in all_bookings:
                 dest_dict = b.get("destinations")
                 if isinstance(dest_dict, dict):
                     dest_title = dest_dict.get("title", "Unknown")
                     dest_counts[dest_title] = dest_counts.get(dest_title, 0) + 1
-            chart_bookings = {"labels": list(dest_counts.keys()), "data": list(dest_counts.values())}
+            # Only include destinations that have ≥1 booking (if any bookings exist)
+            # But if no bookings at all, show all destinations with 0 to indicate real data
+            if all_bookings:
+                dest_counts = {k: v for k, v in dest_counts.items() if v > 0}
+            chart_bookings = {
+                "labels": list(dest_counts.keys()),
+                "data":   list(dest_counts.values())
+            }
 
-            loc_revenue = {}
+            # ── Chart 2: Revenue by Location ────────────────────────────────
+            # Seed all unique locations with 0 revenue
+            loc_revenue = {d["location"]: 0.0 for d in destinations}
             for b in all_bookings:
                 dest_dict = b.get("destinations")
                 if isinstance(dest_dict, dict):
                     loc = dest_dict.get("location", "Unknown")
                     rev = float(b.get("total_price", 0))
-                    loc_revenue[loc] = loc_revenue.get(loc, 0) + rev
-            chart_revenue = {"labels": list(loc_revenue.keys()), "data": list(loc_revenue.values())}
+                    loc_revenue[loc] = loc_revenue.get(loc, 0.0) + rev
+            if all_bookings:
+                loc_revenue = {k: v for k, v in loc_revenue.items() if v > 0}
+            chart_revenue = {
+                "labels": list(loc_revenue.keys()),
+                "data":   list(loc_revenue.values())
+            }
 
+            # ── Chart 3: Booking Activity (Monthly) ─────────────────────────
+            # Always use real data — no dummy fallback
             monthly_data = {}
             for b in all_bookings:
                 try:
-                    date_str = b.get("check_in") or b.get("created_at")
+                    date_str = b.get("check_in") or b.get("created_at", "")
                     if date_str:
-                        month = date_str[:7]
+                        month = date_str[:7]   # "YYYY-MM"
                         monthly_data[month] = monthly_data.get(month, 0) + 1
-                except: pass
-            
-            if len(monthly_data) < 3:
-                chart_trend = {"labels": ["Jan", "Feb", "Mar", "Apr", "May", "Jun"], "data": [12, 19, 3, 5, 2, 3]}
-            else:
-                sorted_months = sorted(monthly_data.keys())
-                chart_trend = {"labels": sorted_months, "data": [monthly_data[m] for m in sorted_months]}
+                except Exception:
+                    pass
+            sorted_months = sorted(monthly_data.keys())
+            chart_trend = {
+                "labels": sorted_months,
+                "data":   [monthly_data[m] for m in sorted_months]
+            }
                 
             admin_data = {
                 "destinations": destinations,
@@ -219,7 +237,7 @@ def dashboard():
                 "chart_trend": chart_trend
             }
 
-        return render_template("dashboard.html", user=user, **admin_data)
+        return render_template("admin.html", user=user, **admin_data)
         
     except Exception as e:
         flash(f"Error loading dashboard: {str(e)}", "danger")
@@ -249,6 +267,22 @@ def booking(dest_id):
             
     return render_template("booking.html", destination=dest)
 
+
+
+@app.route("/forgot-password", methods=["GET", "POST"])
+def forgot_password():
+    if request.method == "POST":
+        email = request.form.get("email", "").strip()
+        if not email:
+            flash("Please enter your email address.", "warning")
+            return redirect(url_for("forgot_password"))
+        try:
+            reset_password_email(email)
+            flash("If that email exists, a password reset link has been sent. Check your inbox.", "success")
+            return redirect(url_for("login"))
+        except Exception as e:
+            flash(f"Error: {str(e)}", "danger")
+    return render_template("forgot_password.html")
 
 
 if __name__ == "__main__":

@@ -1,29 +1,94 @@
 {% extends "base.html" %}
 
 {% block content %}
-<main class="container" style="margin-top: 60px;">
-    <div style="text-align: center; margin-bottom: 50px;">
-        <h1 style="font-size: 3rem;">All Destinations</h1>
-        <p style="color: #64748b; font-size: 1.1rem; max-width: 600px; margin: 20px auto;">Choose your next journey from
-            our top-rated locations.</p>
-    </div>
-
-    <div class="grid">
-        {% for dest in destinations %}
-        <div class="card">
-            <img src="{{ dest.image_url }}" alt="{{ dest.title }}">
-            <div class="card-body">
-                <div class="card-location"><i class="fas fa-location-dot"></i> {{ dest.location }}</div>
-                <h3 class="card-title">{{ dest.title }}</h3>
-                <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 20px; height: 3.6em; overflow: hidden;">{{
-                    dest.description }}</p>
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <span class="card-price">${{ dest.price }}</span>
-                    <a href="{{ url_for('destination_detail', id=dest.id) }}" class="btn btn-primary">View Details</a>
-                </div>
+<main>
+    <!-- Discovery Hero Section -->
+    <section class="discovery-header">
+        <div class="container">
+            <h1 class="discovery-title">Discover Your Next Journey</h1>
+            <p class="discovery-subtitle">Explore our hand-picked collection of premium global destinations, where luxury meets adventure.</p>
+            
+            <div class="search-field-container">
+                <i class="fas fa-search"></i>
+                <input type="text" id="destSearch" class="search-field" placeholder="Search by destination or location..." onkeyup="filterDestinations()">
             </div>
         </div>
-        {% endfor %}
-    </div>
+    </section>
+
+    <!-- Destination Grid Section -->
+    <section class="container" style="padding-top: 20px;">
+        <div class="destination-grid" id="destCardGrid">
+            {% for dest in destinations %}
+            <div class="premium-card" data-title="{{ dest.title | lower }}" data-location="{{ dest.location | lower }}">
+                <div class="card-image-wrapper">
+                    <img src="{{ dest.image_url }}" alt="{{ dest.title }}" class="card-image">
+                    <div class="card-badge">
+                        <i class="fas fa-star" style="color: #f59e0b; margin-right: 4px;"></i>
+                        Top Rated
+                    </div>
+                </div>
+                
+                <div class="card-content">
+                    <div class="card-meta">
+                        <i class="fas fa-map-marker-alt"></i>
+                        {{ dest.location }}
+                    </div>
+                    <h3 class="card-name">{{ dest.title }}</h3>
+                    <p class="card-desc">{{ dest.description }}</p>
+                    
+                    <div class="card-foot">
+                        <div class="card-price-wrap">
+                            <span class="price-label">Starts from</span>
+                            <span class="price-val">${{ "{:,.0f}".format(dest.price) }}</span>
+                        </div>
+                        <a href="{{ url_for('destination_detail', id=dest.id) }}" class="btn btn-primary">
+                            View Details
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+
+            <!-- No Results State -->
+            <div id="noResults" class="empty-state-search" style="display: none;">
+                <i class="fas fa-search-location"></i>
+                <h3>No results found</h3>
+                <p style="color: #64748b;">Try searching for a different destination or location.</p>
+                <button onclick="resetSearch()" class="btn btn-light-contrast" style="margin-top: 20px;">Clear search</button>
+            </div>
+        </div>
+    </section>
 </main>
+
+<script>
+function filterDestinations() {
+    const input = document.getElementById('destSearch');
+    const filter = input.value.toLowerCase();
+    const grid = document.getElementById('destCardGrid');
+    const cards = grid.getElementsByClassName('premium-card');
+    const noResults = document.getElementById('noResults');
+    let hasResults = false;
+
+    for (let i = 0; i < cards.length; i++) {
+        const title = cards[i].getAttribute('data-title');
+        const location = cards[i].getAttribute('data-location');
+        
+        if (title.includes(filter) || location.includes(filter)) {
+            cards[i].style.display = "";
+            hasResults = true;
+        } else {
+            cards[i].style.display = "none";
+        }
+    }
+
+    noResults.style.display = hasResults ? "none" : "block";
+}
+
+function resetSearch() {
+    const input = document.getElementById('destSearch');
+    input.value = '';
+    filterDestinations();
+    input.focus();
+}
+</script>
 {% endblock %}
